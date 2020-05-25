@@ -1,3 +1,8 @@
-# CVMFS monitor
+# JS Monitor
 
-CVMFS monitor service. HTTP REST API backend and React JS frontend.
+* [Web Application](https://github.com/mormar/cvm-monitor)
+* [Server](https://github.com/cvmfs-contrib/cvmfs-emscripten/tree/feature-node)
+
+## License
+This project is licensed under the BSD-3-Clause License.
+

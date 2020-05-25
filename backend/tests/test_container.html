@@ -1,0 +1,33 @@
+<html>
+  <body>
+    <script type='text/javascript' src='../../third_party/chai.js'></script>
+    <script type='text/javascript'>
+
+      function puppet_notify_exit() {
+        window._cvmfs_exitstatus = EXITSTATUS;
+        window._cvmfs_test_failed = EXITSTATUS !== 0; // this line *has* to come last
+      };
+
+      window.onerror = puppet_notify_exit; // when a JavaScript exception is thrown
+
+      var Module = {
+        print: function(text) {
+          if (arguments.length > 1) {
+            text = Array.prototype.slice.call(arguments).join(' ');
+          }
+          console.log(text);
+        },
+        printErr: function(text) {
+          if (arguments.length > 1) {
+            text = Array.prototype.slice.call(arguments).join(' ');
+          }
+          console.log(text);
+          window._cvmfs_printErr(text);
+        },
+        onExit: puppet_notify_exit // when 'main' returns
+      };
+
+    </script>
+    {{{ SCRIPT }}}
+  </body>
+</html>
