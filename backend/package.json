@@ -2,8 +2,8 @@
   "scripts": {
     "build": "babel -d ./build_babel ./cvmfs",
     "build-addon": "node-gyp rebuild",
-    "start": "echo $(id -u) && nodemon --exec node ./build_babel/server.js",
-    "server": "nodemon --exec babel-node ./cvmfs/server.js",
+    "start": "node ./build_babel/server.js",
+    "start-dev": "nodemon --exec babel-node ./cvmfs/server.js",
     "test": "mocha --require @babel/register ./test/test.js"
   },
   "devDependencies": {
