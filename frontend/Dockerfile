@@ -11,17 +11,17 @@ RUN yum install -y git npm
 ADD https://cern.ch cache_bust
 
 WORKDIR /root
-RUN git clone https://github.com/janpriessnitz/js-monitor.git
+RUN git clone https://gitlab.cern.ch/cernvm/cvmfs-monitor.git
 
-WORKDIR /root/js-monitor/frontend
+WORKDIR /root/cvmfs-monitor/frontend
 RUN npm install
 RUN npm run build
 
-RUN useradd cvmfs-monitor
+RUN useradd monitor
 
 RUN chmod 755 /root
-RUN chown -R cvmfs-monitor:cvmfs-monitor /root/js-monitor/
+RUN chown -R monitor:monitor /root/cvmfs-monitor/
 
-USER cvmfs-monitor
+USER monitor
 
 CMD npm run start
