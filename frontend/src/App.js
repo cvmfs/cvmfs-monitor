@@ -5,6 +5,7 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 import Home from "./components/Home";
 import Page404 from "./components/Page404";
 import Details from "./components/Details";
+import Browser from "./components/Browser";
 import Footer from "./layouts/Footer";
 require("dotenv").config();
 
@@ -14,7 +15,8 @@ function App() {
       <Header />
       <Switch>
         <Route exact path="/" component={Home} />
-        <Route path="/:repository_name" component={Details} />
+        <Route exact path="/:repository_name" component={Details} />
+        <Route exact path="/browse/:repository_name" component={Browser} />
         <Route component={Page404} />
       </Switch>
       <GlobalStyle />
