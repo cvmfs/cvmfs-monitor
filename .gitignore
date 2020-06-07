@@ -1,6 +1,6 @@
 backend/.env
 backend/node_modules
-backend/build_addon
+backend/build
 backend/build_babel
 frontend/.env
 frontend/node_modules
