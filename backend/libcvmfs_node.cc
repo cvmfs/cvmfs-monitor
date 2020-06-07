@@ -2,6 +2,7 @@
 #include <libcvmfs.h>
 #include <stdio.h>
 #include <map>
+#include <sstream>
 
 cvmfs_option_map *g_opts;
 cvmfs_context *g_ctx;
@@ -50,17 +51,17 @@ void FillNc(cvmfs_nc_attr *nc, Napi::Object *obj) {
   obj->Set("size", nc->size);
 
   Napi::Object counters = Napi::Object::New(obj->Env());
-  counters.Set("regular", nc->regular);
-  counters.Set("symlink", nc->symlink);
-  counters.Set("dir", nc->dir);
-  counters.Set("nested", nc->nested);
-  counters.Set("chunked", nc->chunked);
-  counters.Set("chunks", nc->chunks);
-  counters.Set("file_size", nc->file_size);
-  counters.Set("chunked_size", nc->chunked_size);
-  counters.Set("xattr", nc->xattr);
-  counters.Set("external", nc->external);
-  counters.Set("external_file_size", nc->external_file_size);
+  counters.Set("regular", nc->ctr_regular);
+  counters.Set("symlink", nc->ctr_symlink);
+  counters.Set("dir", nc->ctr_dir);
+  counters.Set("nested", nc->ctr_nested);
+  counters.Set("chunked", nc->ctr_chunked);
+  counters.Set("chunks", nc->ctr_chunks);
+  counters.Set("file_size", nc->ctr_file_size);
+  counters.Set("chunked_size", nc->ctr_chunked_size);
+  counters.Set("xattr", nc->ctr_xattr);
+  counters.Set("external", nc->ctr_external);
+  counters.Set("external_file_size", nc->ctr_external_file_size);
 
   obj->Set("counters", counters);
 }
@@ -201,10 +202,12 @@ Napi::Value Close(const Napi::CallbackInfo &info) {
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   g_opts = cvmfs_options_init_v2(0);
-  // cvmfs_options_set(g_opts, "CVMFS_HTTP_PROXY", "DIRECT");
-  cvmfs_init_v2(g_opts);
-  cvmfs_options_parse_default(g_opts, "lhcb.cern.ch");
-  cvmfs_attach_repo_v2("lhcb.cern.ch", g_opts, &g_ctx);
+  int init_retcode = cvmfs_init_v2(g_opts);
+  if (init_retcode != 0) {
+    std::stringstream error_msg;
+    error_msg << "Could not init libcvfs (error " << init_retcode << ")";
+    Napi::Error::New(env, error_msg.str());
+  }
   exports.Set(Napi::String::New(env, "getOption"), Napi::Function::New(env, GetOption));
   exports.Set(Napi::String::New(env, "stat"), Napi::Function::New(env, Stat));
   exports.Set(Napi::String::New(env, "open"), Napi::Function::New(env, Open));
