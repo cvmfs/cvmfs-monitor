@@ -10,7 +10,8 @@
         "."
       ],
       "libraries": [
-        "/usr/lib64/libcvmfs.a",
+        "-lcvmfs",
+        # "/usr/lib64/libcvmfs.a",
         "-lcurl",
         "-luuid"],
       'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ],

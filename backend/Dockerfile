@@ -27,18 +27,17 @@ RUN yum install -y gcc-c++ python3 make git npm
 ADD https://cern.ch cache_bust
 
 WORKDIR /root
-RUN git clone https://github.com/janpriessnitz/js-monitor.git
+RUN git clone https://gitlab.cern.ch/cernvm/cvmfs-monitor.git
 
-WORKDIR /root/js-monitor/backend
+
+RUN useradd cvmfs-monitor
+RUN chmod 755 /root
+RUN chown -R cvmfs-monitor:cvmfs-monitor /root/cvmfs-monitor/
+USER cvmfs-monitor
+
+WORKDIR /root/cvmfs-monitor/backend
 RUN npm install
 RUN npm run build
 RUN npm run build-addon
-
-RUN useradd cvmfs-monitor
-
-RUN chmod 755 /root
-RUN chown -R cvmfs-monitor:cvmfs-monitor /root/js-monitor/
-
-USER cvmfs-monitor
 
 CMD npm run start
