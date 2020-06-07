@@ -10,7 +10,7 @@ USER root
 
 RUN yum install -y openssl libuuid-devel libcurl-devel
 
-RUN curl http://ecsft.cern.ch/dist/cvmfs/nightlies/cvmfs-git-2240/cvmfs-devel-2.8.0-0.2240.fc758aa629c5da16git.el8.x86_64.rpm > /root/cvmfs-devel.rpm
+RUN curl http://ecsft.cern.ch/dist/cvmfs/nightlies/cvmfs-git-2290/cvmfs-devel-2.8.0-0.2290.cb9d83072de7a5e9git.el8.x86_64.rpm > /root/cvmfs-devel.rpm
 RUN rpm -i /root/cvmfs-devel.rpm
 RUN curl http://ecsft.cern.ch/dist/cvmfs/cvmfs-config/cvmfs-config-default-latest.noarch.rpm > /root/cvmfs-config.rpm
 RUN rpm -i /root/cvmfs-config.rpm
