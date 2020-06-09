@@ -60,14 +60,14 @@ class Details extends Component {
     super(props);
     this.state = {
       repositoryData: null,
-      isLoading: false,
+      isLoading: true,
       error: null,
       details: false,
       errorMessage: null 
     };
   }
 
-  componentDidMount() {
+  loadRepositoryData() {
     this.setState({ isLoading: true });
     axios
       .get(process.env.REACT_APP_PRODUCTION_API + "/details/" + this.props.repository.fqrn, {
@@ -87,24 +87,31 @@ class Details extends Component {
         this.setState({ repositoryData: repositoryDownloadData, isLoading: false });
       })
       .catch(error => {
+        this.setState({ isLoading: false });
         this.setState({ error: true });
         this.setState({ errorMessage: error.response !== undefined ? error.response.data : "" });
       });
   }
 
+  componentDidMount() {
+    if (this.props.isFetching === false && this.props.repository != undefined) {
+      this.loadRepositoryData();
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.repository === undefined && this.props.isFetching === false && this.state.isLoading === true) {
+      this.setState({isLoading: false});
+    }
+    if (prevProps.repository === undefined && this.props.repository != undefined) {
+      this.loadRepositoryData();
+    }
+  }
+
   render() {
     const repository = this.props.repository;
     const { repositoryData, error, details, errorMessage } = this.state;
-    if (error || repository === undefined) {
-      return (
-        <Page>
-          <Title className="page404">404</Title>
-          <ErrorTitle>{errorMessage}</ErrorTitle>
-        </Page>
-      );
-    }
-
-    if (this.state.repositoryData === null || this.props.isFetching === true) {
+    if (this.state.isLoading === true || this.props.isFetching === true) {
       return (
         <Page>
           <FontAwesomeIcon
@@ -113,6 +120,13 @@ class Details extends Component {
             size="6x"
             className="fa-spin"
           />
+        </Page>
+      );
+    } else if (error || repository === undefined) {
+      return (
+        <Page>
+          <Title className="page404">404</Title>
+          <ErrorTitle>{errorMessage}</ErrorTitle>
         </Page>
       );
     } else {

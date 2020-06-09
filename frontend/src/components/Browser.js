@@ -47,7 +47,15 @@ class Browser extends Component {
   }
 
   componentDidMount() {
-    this.updatePath("");
+    if (this.props.repository != undefined) {
+      this.updatePath("");
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.repository === undefined && this.props.repository != undefined) {
+      this.updatePath("");
+    }
   }
 
   updatePath(path) {
@@ -86,7 +94,7 @@ class Browser extends Component {
   }
 
   getFetchLinkRelative(filename) {
-    return process.env.REACT_APP_PRODUCTION_API + "/fetch/" + this.props.repository.url + this.state.currentPath + "/" + filename;
+    return process.env.REACT_APP_PRODUCTION_API + "/fetch/" + this.props.repository.fqrn + this.state.currentPath + "/" + filename;
   }
 
   render() {
@@ -104,7 +112,7 @@ class Browser extends Component {
     } else {
       return (
         <Box>     
-          <Title>Repository browser - {this.props.repository.url}</Title>
+          <Title>Repository browser - {this.props.repository.fqrn}</Title>
           <table>
             <thead>
               <tr>
