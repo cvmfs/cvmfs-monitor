@@ -9,19 +9,26 @@ cvmfs_context *g_ctx;
 
 std::map <std::string, cvmfs_context *> g_attached_repos;
 
-bool AttachRepo(const std::string repo) {
+bool AttachRepo(const std::string repo, Napi::Env env) {
   cvmfs_option_map *opts = cvmfs_options_clone(g_opts);
   cvmfs_options_parse_default(opts, repo.c_str());
   cvmfs_context *context;
-  cvmfs_attach_repo_v2(repo.c_str(), opts, &context);
+  int retcode = cvmfs_attach_repo_v2(repo.c_str(), opts, &context);
+  if (retcode != 0) {
+    std::stringstream error_msg;
+    error_msg << "Could not open repository " << repo << " (error code " << retcode << ")";
+    Napi::Error::New(env, error_msg.str()).ThrowAsJavaScriptException();
+    cvmfs_options_fini(opts);
+    return false;
+  }
   cvmfs_adopt_options(context, opts);
   g_attached_repos[repo] = context;
-  return opts;
+  return true;
 }
 
-cvmfs_context *GetRepoCtx(const std::string repo) {
+cvmfs_context *GetRepoCtx(const std::string repo, Napi::Env env) {
   if (g_attached_repos.count(repo) == 0) {
-    if (!AttachRepo(repo)) return NULL;
+    if (!AttachRepo(repo, env)) return NULL;
   }
   return g_attached_repos[repo];
 }
@@ -91,7 +98,7 @@ Napi::Value GetOption(const Napi::CallbackInfo& info) {
     free(val);
     return res;
   } else {
-    return Napi::String();
+    return Napi::String::New(env, "");
   }
 }
 
@@ -106,12 +113,20 @@ Napi::Value Stat(const Napi::CallbackInfo &info) {
   std::string repo = info[0].As<Napi::String>();
   std::string path = info[1].As<Napi::String>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo);
+  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  if (ctx == NULL) {
+    return env.Null();
+  }
   cvmfs_attr *attr = cvmfs_attr_init();
   int retval = cvmfs_stat_attr(ctx, path.c_str(), attr);
   if (retval) {
-    fprintf(stderr, "failed to stat file %s\n", path.c_str());
+    std::stringstream error_msg;
+    error_msg << "Failed to stat file (error code " << errno << ")";
+    Napi::Error::New(env, error_msg.str()).ThrowAsJavaScriptException();
+    cvmfs_attr_free(attr);
+    return env.Null();
   }
+
   FillAttr(attr, &result);
 
   cvmfs_attr_free(attr);
@@ -121,7 +136,14 @@ Napi::Value Stat(const Napi::CallbackInfo &info) {
     cvmfs_stat_t *buf = reinterpret_cast<cvmfs_stat_t *>(calloc(kInitialBufSize, sizeof(cvmfs_stat_t)));
     size_t listlen = 0;
     size_t buflen = kInitialBufSize;
-    cvmfs_listdir_stat(ctx, path.c_str(), &buf, &listlen, &buflen);
+    retval = cvmfs_listdir_stat(ctx, path.c_str(), &buf, &listlen, &buflen);
+    if (retval) {
+      std::stringstream error_msg;
+      error_msg << "Failed to list directory (error code " << errno << ")";
+      Napi::Error::New(env, error_msg.str()).ThrowAsJavaScriptException();
+      free(buf);
+      return env.Null();
+    }
 
     Napi::Array list = Napi::Array::New(env, listlen);
     for (size_t i = 0; i < listlen; ++i) {
@@ -152,8 +174,17 @@ Napi::Value Open(const Napi::CallbackInfo &info) {
   std::string repo = info[0].As<Napi::String>();
   std::string path = info[1].As<Napi::String>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo);
+  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  if (ctx == NULL) {
+    return env.Null();
+  }
   int fd = cvmfs_open(ctx, path.c_str());
+  if (fd < 0) {
+    std::stringstream error_msg;
+    error_msg << "Could not open file (error " << errno << ")";
+    Napi::Error::New(env, error_msg.str()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
   return Napi::Number::New(env, fd);
 }
 
@@ -171,11 +202,20 @@ Napi::Value Pread(const Napi::CallbackInfo &info) {
   int64_t size = info[2].As<Napi::Number>();
   int64_t offset = info[3].As<Napi::Number>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo);
+  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  if (ctx == NULL) {
+    return env.Null();
+  }
 
   Napi::ArrayBuffer buf = Napi::ArrayBuffer::New(env, size);
 
   ssize_t bytesRead = cvmfs_pread(ctx, fd, buf.Data(), size, offset);
+  if (bytesRead < 0) {
+    std::stringstream error_msg;
+    error_msg << "Could not read file (error " << errno << ")";
+    Napi::Error::New(env, error_msg.str()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
 
   Napi::Object res = Napi::Object::New(env);
   res.Set("buffer", buf);
@@ -193,8 +233,9 @@ Napi::Value Close(const Napi::CallbackInfo &info) {
   std::string repo = info[0].As<Napi::String>();
   int fd = info[1].As<Napi::Number>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo);
-  if (!ctx) return Napi::Boolean::New(env, false);
+  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  if (!ctx) {
+  }
 
   int retcode = cvmfs_close(ctx, fd);
   return Napi::Boolean::New(env, retcode == 0);
@@ -206,7 +247,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   if (init_retcode != 0) {
     std::stringstream error_msg;
     error_msg << "Could not init libcvfs (error " << init_retcode << ")";
-    Napi::Error::New(env, error_msg.str());
+    Napi::Error::New(env, error_msg.str()).ThrowAsJavaScriptException();
   }
   exports.Set(Napi::String::New(env, "getOption"), Napi::Function::New(env, GetOption));
   exports.Set(Napi::String::New(env, "stat"), Napi::Function::New(env, Stat));

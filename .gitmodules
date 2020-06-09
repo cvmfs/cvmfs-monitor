@@ -1,0 +1,3 @@
+[submodule "backend/monitor-repos"]
+	path = backend/monitor-repos
+	url = https://github.com/cvmfs/monitor-repos.git
