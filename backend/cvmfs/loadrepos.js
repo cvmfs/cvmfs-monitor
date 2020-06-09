@@ -5,7 +5,7 @@ const kTTL = 1000*60*15;  // 15 minutes
 var lastUpdated = 0;
 function pullGitRepo() {
     // TODO: error handling 
-    const output = execSync('cd monitor-repos && git pull', { encoding: 'utf-8'});
+    const output = execSync('git submodule update', { encoding: 'utf-8'});
     lastUpdated = Date.now();
 }
 

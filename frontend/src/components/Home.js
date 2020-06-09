@@ -58,6 +58,7 @@ class Home extends Component {
     const { repositories } = this.props;
     const { search } = this.state;
     const orderedKeys = Object.keys(repositories).sort()
+    console.log(repositories);
 
     const repositoriesList = orderedKeys.map(key => {
       return (

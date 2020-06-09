@@ -104,7 +104,7 @@ class Details extends Component {
       );
     }
 
-    if (this.state.repositoryData === null || this.props.isFetching) {
+    if (this.state.repositoryData === null || this.props.isFetching === true) {
       return (
         <Page>
           <FontAwesomeIcon

@@ -53,13 +53,13 @@ class Browser extends Component {
   updatePath(path) {
     this.setState({ isLoading: true });
     axios
-    .get(process.env.REACT_APP_PRODUCTION_API + "/stat/" + this.props.repository.url + path, {
-      // params: {
-        // repoUrl:
-          // this.props.repository !== undefined
-            // ? this.props.repository.repositoryWebsite
-            // : this.setState({ error: true })
-      // }
+    .get(process.env.REACT_APP_PRODUCTION_API + "/stat/" + this.props.repository.fqrn + path, {
+      params: {
+        repoUrl:
+          this.props.repository !== undefined
+            ? this.props.repository.url
+            : this.setState({ error: true })
+      }
     })
     .then(result => {
       this.setState({
@@ -90,7 +90,7 @@ class Browser extends Component {
   }
 
   render() {
-    if (this.state.isLoading === true) {
+    if (this.state.isLoading === true || this.props.isFetching === true) {
       return (
         <Page>
           <FontAwesomeIcon
@@ -156,7 +156,8 @@ class Browser extends Component {
 const mapStateToProps = (state, ownProps) => {
   let id = ownProps.match.params.repository_name;
   return {
-    repository: state.repositories.find(repository => repository.url === id)
+    repository: state.repositories[id],
+    isFetching: state.isFetching
   };
 };
 

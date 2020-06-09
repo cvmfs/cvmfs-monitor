@@ -31,11 +31,12 @@ RUN git clone https://gitlab.cern.ch/cernvm/cvmfs-monitor.git
 
 
 RUN useradd cvmfs-monitor
-RUN chmod 755 /root
+RUN chmod -R 777 /root
 RUN chown -R cvmfs-monitor:cvmfs-monitor /root/cvmfs-monitor/
-USER cvmfs-monitor
 
+USER cvmfs-monitor
 WORKDIR /root/cvmfs-monitor/backend
+RUN git submodule init
 RUN npm install
 RUN npm run build
 RUN npm run build-addon
