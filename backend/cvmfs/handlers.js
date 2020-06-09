@@ -1,6 +1,15 @@
 import { getJSONfromRepository } from './cvmfs.js';
 var libcvmfs = require('../build/Release/cvmfs_node.node');
 
+var repolist = require('./loadrepos');
+
+export async function repos(req, res) {
+
+    res.json({
+        repositories: repolist()
+    });
+}
+
 export async function details(req, res) {
     let repoName = req.params.repo;
     let baseRepoUrl = req.query.repoUrl;

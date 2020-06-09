@@ -25,7 +25,7 @@ app.use(function (req, res, next) {
 const port = process.env.PORT;
 app.listen(port, () => `Server running on port ${port}`);
 
-
+app.get("/api/repos", handlers.repos);
 app.get("/api/details/:repo", handlers.details);
 app.get("/api/stat/:repo", handlers.stat);
 app.get("/api/stat/:repo/:path([^?]+)", handlers.stat);
