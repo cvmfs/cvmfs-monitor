@@ -6,12 +6,12 @@ import {
   grey,
   gravel,
   roboto,
-  green,
+  // green,
   red,
-  yellow,
+  // yellow,
   above,
-  white,
-  gray
+  // white,
+  // gray
 } from "../utilities";
 
 export default styled.div`

@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { black, above } from "../utilities";
 import { Input } from "../elements";
 import { connect } from "react-redux";
-import { getRepository } from "../actions/getRepository";
 
 const Main = styled.div`
   max-width: 1200px;
@@ -58,34 +57,18 @@ class Home extends Component {
   render() {
     const { repositories } = this.props;
     const { search } = this.state;
+    const orderedKeys = Object.keys(repositories).sort()
 
-    const alphabetiseRepositories = [...repositories].sort(function(a, b) {
-      if (a.name.toLowerCase() < b.name.toLowerCase()) {
-        return -1;
-      }
-      if (a.name.toLowerCase() > b.name.toLowerCase()) {
-        return 1;
-      }
-      return 0;
+    const repositoriesList = orderedKeys.map(key => {
+      return (
+        <div key={repositories[key].fqrn}>
+          <Link className="repository-name" to={"/" + repositories[key].fqrn}>
+            {repositories[key].name}
+          </Link>
+        </div>
+      );
     });
 
-    const findRepository = alphabetiseRepositories.filter(repository => {
-      return repository.name.toLowerCase().indexOf(search.toLowerCase()) !== -1;
-    });
-
-    const repositoriesList = findRepository.length ? (
-      findRepository.map(repository => {
-        return (
-          <div key={repository.id}>
-            <Link className="repository-name" to={"/" + repository.url}>
-              {repository.name}
-            </Link>
-          </div>
-        );
-      })
-    ) : (
-      <div className="repository-name">Unknown repository</div>
-    );
 
     return (
       <Main>
@@ -107,15 +90,6 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
-  return {
-    getRepository: id => {
-      dispatch(getRepository(id));
-    }
-  };
-};
-
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  mapStateToProps
 )(Home);

@@ -1,17 +1,17 @@
 import styled from "styled-components";
 import {
   black,
-  shipGrey,
-  athensGrey,
-  grey,
-  gravel,
+  // shipGrey,
+  // athensGrey,
+  // grey,
+  // gravel,
   roboto,
-  green,
-  red,
-  yellow,
+  // green,
+  // red,
+  // yellow,
   above,
-  white,
-  gray
+  // white,
+  // gray
 } from "../utilities";
 
 export default styled.div`

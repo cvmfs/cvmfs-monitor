@@ -5,25 +5,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTimes,
   faCheck,
-  faAngleDown,
-  faAngleUp,
+  // faAngleDown,
+  // faAngleUp,
   faExclamationTriangle,
-  faSpinner
+  // faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
-  black,
-  shipGrey,
-  athensGrey,
-  grey,
-  gravel,
-  roboto,
+  // black,
+  // shipGrey,
+  // athensGrey,
+  // grey,
+  // gravel,
+  // roboto,
   green,
   red,
   yellow,
-  above,
-  white,
-  gray
+  // above,
+  // white,
+  // gray
 } from "../utilities";
 
 import moment from "moment";

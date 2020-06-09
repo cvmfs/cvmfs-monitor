@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { getRepository } from "../actions/getRepository";
 import { connect } from "react-redux";
 import axios from "axios";
 
@@ -7,31 +6,31 @@ import axios from "axios";
 import Title from "../elements/Title";
 import Box from "../elements/Box";
 import Page from "../elements/Page";
-import { Button } from "../elements";
-import { Path } from "leaflet";
+// import { Button } from "../elements";
+// import { Path } from "leaflet";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import {
-  black,
-  shipGrey,
-  athensGrey,
-  grey,
-  gravel,
-  roboto,
-  green,
-  red,
-  yellow,
-  above,
-  white,
+  // black,
+  // shipGrey,
+  // athensGrey,
+  // grey,
+  // gravel,
+  // roboto,
+  // green,
+  // red,
+  // yellow,
+  // above,
+  // white,
   gray
 } from "../utilities";
 
 import {
-  faTimes,
-  faCheck,
-  faAngleDown,
-  faAngleUp,
-  faExclamationTriangle,
+  // faTimes,
+  // faCheck,
+  // faAngleDown,
+  // faAngleUp,
+  // faExclamationTriangle,
   faSpinner,
   faFile,
   faFolder
@@ -48,13 +47,11 @@ class Browser extends Component {
   }
 
   componentDidMount() {
-    console.log("componentDidMount");
     this.updatePath("");
   }
 
   updatePath(path) {
     this.setState({ isLoading: true });
-    console.log("updatePath");
     axios
     .get(process.env.REACT_APP_PRODUCTION_API + "/stat/" + this.props.repository.url + path, {
       // params: {
@@ -65,20 +62,11 @@ class Browser extends Component {
       // }
     })
     .then(result => {
-      console.log(result.data);
       this.setState({
         currentPath: path,
         stat: result.data,
         isLoading: false
       });
-      // const repositoryDownloadData = result.data;
-      // const certificateBlob = new Blob([result.data.download.certificate], {type: 'application/x-pem-file'});
-      // const metinfoBlob = new Blob([result.data.download.metainfo], {type: 'text/json'});
-      // repositoryDownloadData.download.certificate = window.URL.createObjectURL(certificateBlob);
-      // repositoryDownloadData.download.metainfo = window.URL.createObjectURL(metinfoBlob);
-      // this.setState({ repositoryData: repositoryDownloadData, isLoading: false });
-      // this.setState()
-      // console.log(result)
     })
     .catch(error => {
       this.setState({ error: true });

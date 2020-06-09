@@ -3,26 +3,25 @@ import { Link } from "react-router-dom"
 import styled from "styled-components";
 import {
   black,
-  shipGrey,
-  athensGrey,
-  grey,
-  gravel,
+  // shipGrey,
+  // athensGrey,
+  // grey,
+  // gravel,
   roboto,
-  green,
-  red,
-  yellow,
+  // green,
+  // red,
+  // yellow,
   above,
-  white,
+  // white,
   gray
 } from "../utilities";
-import { getRepository } from "../actions/getRepository";
 import { connect } from "react-redux";
 import {
-  faTimes,
-  faCheck,
-  faAngleDown,
-  faAngleUp,
-  faExclamationTriangle,
+  // faTimes,
+  // faCheck,
+  // faAngleDown,
+  // faAngleUp,
+  // faExclamationTriangle,
   faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -71,11 +70,11 @@ class Details extends Component {
   componentDidMount() {
     this.setState({ isLoading: true });
     axios
-      .get(process.env.REACT_APP_PRODUCTION_API + "/details/" + this.props.repository.url, {
+      .get(process.env.REACT_APP_PRODUCTION_API + "/details/" + this.props.repository.fqrn, {
         params: {
           repoUrl:
             this.props.repository !== undefined
-              ? this.props.repository.repositoryWebsite
+              ? this.props.repository.url
               : this.setState({ error: true })
         }
       })
@@ -86,7 +85,6 @@ class Details extends Component {
         repositoryDownloadData.download.certificate = window.URL.createObjectURL(certificateBlob);
         repositoryDownloadData.download.metainfo = window.URL.createObjectURL(metinfoBlob);
         this.setState({ repositoryData: repositoryDownloadData, isLoading: false });
-        // console.log(result)
       })
       .catch(error => {
         this.setState({ error: true });
@@ -95,10 +93,9 @@ class Details extends Component {
   }
 
   render() {
-    const { repository } = this.props;
+    const repository = this.props.repository;
     const { repositoryData, error, details, errorMessage } = this.state;
-
-    if (error) {
+    if (error || repository === undefined) {
       return (
         <Page>
           <Title className="page404">404</Title>
@@ -107,7 +104,7 @@ class Details extends Component {
       );
     }
 
-    if (this.state.repositoryData === null) {
+    if (this.state.repositoryData === null || this.props.isFetching) {
       return (
         <Page>
           <FontAwesomeIcon
@@ -122,7 +119,7 @@ class Details extends Component {
       return (
         <Box>
           <Title>{repository.name}</Title>
-          <Link to={"/browse/" + repository.url} >
+          <Link to={"/browse/" + repository.fqrn} >
             <Button>
               Browse this repository (experimental)
             </Button>
@@ -140,19 +137,10 @@ class Details extends Component {
 const mapStateToProps = (state, ownProps) => {
   let id = ownProps.match.params.repository_name;
   return {
-    repository: state.repositories.find(repository => repository.url === id)
+    repositories: state.repositories,
+    repository: state.repositories[id],
+    isFetching: state.isFetching
   };
 };
 
-const mapDispatchToProps = dispatch => {
-  return {
-    getRepository: id => {
-      dispatch(getRepository(id));
-    }
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Details);
+export default connect(mapStateToProps)(Details);
