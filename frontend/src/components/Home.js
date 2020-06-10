@@ -100,9 +100,9 @@ class Home extends Component {
 
     return (
       <Main>
-        <Title>CVMFS monitor</Title>
+        <Title>CernVM-FS Repository Monitor</Title>
         <Intro>
-          This is a website for monitoring CVMFS repositories.<br />
+          This is a website for monitoring CernVM-FS repositories.<br />
           It provides basic information about a repository and its status, notably Stratum1 replication status.
         </Intro>
         <Intro>
