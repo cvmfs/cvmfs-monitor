@@ -43,6 +43,33 @@ const Title = styled.div`
   `}
 `;
 
+const Title2 = styled.div`
+  padding: 20px 0px;
+  color: ${black};
+  font-size: 1.2em;
+  font-weight: 500;
+  ${above.smallPhone`
+    font-size: 1.5em;
+  `}
+  ${above.phone`
+    font-size: 2em;
+  `}
+`;
+
+const Intro = styled.div`
+  line-height: 1.2em;
+  padding: 5px 0px;
+  color: ${black};
+  font-size: 1.3em;
+  font-weight: 400;
+  ${above.smallPhone`
+    font-size: 1.3em;
+  `}
+  ${above.phone`
+    font-size: 1.3em;
+  `}
+`;
+
 class Home extends Component {
   state = { search: "" };
   
@@ -73,7 +100,20 @@ class Home extends Component {
 
     return (
       <Main>
-        <Title>Registered Repositories</Title>
+        <Title>CVMFS monitor</Title>
+        <Intro>
+          This is a website for monitoring CVMFS repositories.<br />
+          It provides basic information about a repository and its status, notably Stratum1 replication status.
+        </Intro>
+        <Intro>
+          Do not see your repository here?
+          <br />Follow these steps to subscribe your repository to this monitoring app:
+          <ol>
+            <li>Provide metainfo for your repository (see <a href="https://cvmfs.readthedocs.io/en/latest/cpt-servermeta.html">https://cvmfs.readthedocs.io/en/latest/cpt-servermeta.html</a>)</li>
+            <li>Register your repository by adding a file to <a href="https://github.com/cvmfs/monitor-repos">cvmfs/monitor-repos</a> Github repository.<br />You can open a pull request, we will merge it.</li>
+          </ol>
+        </Intro>
+        <Title2>Registered Repositories</Title2>
         <Input
           onChange={this.handleChange}
           value={search}

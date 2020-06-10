@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import axios from "axios";
 
 
+import Alert from "../elements/Alert";
 import Title from "../elements/Title";
 import Box from "../elements/Box";
 import Page from "../elements/Page";
@@ -47,13 +48,13 @@ class Browser extends Component {
   }
 
   componentDidMount() {
-    if (this.props.repository != undefined) {
+    if (this.props.repository !== undefined) {
       this.updatePath("");
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.repository === undefined && this.props.repository != undefined) {
+    if (prevProps.repository === undefined && this.props.repository !== undefined) {
       this.updatePath("");
     }
   }
@@ -94,7 +95,10 @@ class Browser extends Component {
   }
 
   getFetchLinkRelative(filename) {
-    return process.env.REACT_APP_PRODUCTION_API + "/fetch/" + this.props.repository.fqrn + this.state.currentPath + "/" + filename;
+    return process.env.REACT_APP_PRODUCTION_API +
+           "/fetch/" + this.props.repository.fqrn +
+           this.state.currentPath +
+           "/" + filename;
   }
 
   render() {
@@ -113,6 +117,8 @@ class Browser extends Component {
       return (
         <Box>     
           <Title>Repository browser - {this.props.repository.fqrn}</Title>
+          <Alert>INTERACTIVE USE ONLY - please do not use this browser in your scripts,
+            as it is not designed to handle large number of requests.</Alert>
           <table>
             <thead>
               <tr>

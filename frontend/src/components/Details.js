@@ -62,7 +62,6 @@ class Details extends Component {
       repositoryData: null,
       isLoading: true,
       error: null,
-      details: false,
       errorMessage: null 
     };
   }
@@ -94,23 +93,25 @@ class Details extends Component {
   }
 
   componentDidMount() {
-    if (this.props.isFetching === false && this.props.repository != undefined) {
+    if (this.props.isFetching === false && this.props.repository !== undefined) {
       this.loadRepositoryData();
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.repository === undefined && this.props.isFetching === false && this.state.isLoading === true) {
+    if (this.props.repository === undefined &&
+        this.props.isFetching === false &&
+        this.state.isLoading === true) {
       this.setState({isLoading: false});
     }
-    if (prevProps.repository === undefined && this.props.repository != undefined) {
+    if (prevProps.repository === undefined && this.props.repository !== undefined) {
       this.loadRepositoryData();
     }
   }
 
   render() {
     const repository = this.props.repository;
-    const { repositoryData, error, details, errorMessage } = this.state;
+    const { repositoryData, error, errorMessage } = this.state;
     if (this.state.isLoading === true || this.props.isFetching === true) {
       return (
         <Page>
