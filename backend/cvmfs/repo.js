@@ -53,7 +53,7 @@ export class Repository {
     this._manifest = await this.retriever.fetchManifest(this.manifestURL, this._repoName);
     // console.log("this._manifest", this._manifest);
     if(! this._manifest.metainfoHash) {
-      throw new Error("metainfoHash is undefined; Without metainfo we cannot proceed");
+      throw new Error("metainfoHash is undefined");
     }
     
     this.catalogURL = this.retriever.generateChunkURL(this._dataURL, this._manifest.catalogHash.downloadHandle, 'C')
@@ -127,7 +127,7 @@ export class Repository {
     }
 
     if(! this._manifest.metainfoHash) {
-      throw new Error("metainfoHash is undefined; Without metainfo we cannot proceed");
+      throw new Error("metainfoHash is undefined");
     }
 
     this._metainfo =  await this.retriever.fetchMetainfo(this.metainfoURL, this._manifest.metainfoHash, this._manifest.certHash);

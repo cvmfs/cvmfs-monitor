@@ -22,11 +22,15 @@ export async function details(req, res) {
 
     try {
         console.log(`Fetching repository ${repoName} from ${baseRepoUrl}`);
-        const reposonseJSON = await getJSONfromRepository(baseRepoUrl, repoName);
+        let reposonseJSON = await getJSONfromRepository(baseRepoUrl, repoName);
+        reposonseJSON.status = "ok";
         res.json(reposonseJSON);
     } catch (error) {
-        console.log(error)
-        res.status(404).send(error.message);
+        res.json({
+            status: "error",
+            error: error.message
+        });
+        console.log(error);
     }
 }
 
