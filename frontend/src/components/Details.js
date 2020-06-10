@@ -33,6 +33,7 @@ import Stratum1List from "../components/Stratum1List";
 import Title from "../elements/Title";
 import Box from "../elements/Box";
 import Page from "../elements/Page";
+import Alert from "../elements/Alert";
 
 const Subtitle = styled.div`
   padding: 0px 15px 20px;
@@ -60,9 +61,10 @@ class Details extends Component {
     super(props);
     this.state = {
       repositoryData: null,
-      isLoading: true,
       error: null,
-      errorMessage: null 
+      errorMessage: null,
+      isLoading: true,
+      noMetainfo: false
     };
   }
 
@@ -79,6 +81,19 @@ class Details extends Component {
       })
       .then(result => {
         const repositoryDownloadData = result.data;
+        if(repositoryDownloadData.status !== "ok") {
+          if (repositoryDownloadData.error === "metainfoHash is undefined") {
+            this.setState({
+              isLoading: false,
+              noMetainfo: true });
+          } else {
+            this.setState({
+              isLoading: false,
+              error: true,
+              errorMessage: repositoryDownloadData.error });
+          }
+          return;
+        }
         const certificateBlob = new Blob([result.data.download.certificate], {type: 'application/x-pem-file'});
         const metinfoBlob = new Blob([result.data.download.metainfo], {type: 'text/json'});
         repositoryDownloadData.download.certificate = window.URL.createObjectURL(certificateBlob);
@@ -86,9 +101,10 @@ class Details extends Component {
         this.setState({ repositoryData: repositoryDownloadData, isLoading: false });
       })
       .catch(error => {
-        this.setState({ isLoading: false });
-        this.setState({ error: true });
-        this.setState({ errorMessage: error.response !== undefined ? error.response.data : "" });
+        this.setState({ 
+          isLoading: false,
+          error: true,
+          errorMessage: error.response !== undefined ? error.response.data : "" });
       });
   }
 
@@ -111,8 +127,8 @@ class Details extends Component {
 
   render() {
     const repository = this.props.repository;
-    const { repositoryData, error, errorMessage } = this.state;
-    if (this.state.isLoading === true || this.props.isFetching === true) {
+    const { repositoryData, error, errorMessage, isLoading, noMetainfo } = this.state;
+    if (isLoading === true || this.props.isFetching === true) {
       return (
         <Page>
           <FontAwesomeIcon
@@ -123,6 +139,13 @@ class Details extends Component {
           />
         </Page>
       );
+    } else if (noMetainfo) {
+      return (
+        <Page>
+          <Title>{repository.name}</Title>
+          <Alert>This repository has got no metainfo. To display this repository here, add repository metainfo (see <a href="https://cvmfs.readthedocs.io/en/latest/cpt-servermeta.html">https://cvmfs.readthedocs.io/en/latest/cpt-servermeta.html</a>).</Alert>
+        </Page>
+      )
     } else if (error || repository === undefined) {
       return (
         <Page>
