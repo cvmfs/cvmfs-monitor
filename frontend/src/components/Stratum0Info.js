@@ -35,14 +35,14 @@ class Stratum0Info extends Component {
         details: false,
     };
   }
-  
+
   render() {
     return (
       <table>
         <thead>
           <tr>
             <th className="table-title" colSpan="2">
-              Stratum 0
+              Repository {this.props.repository.fqrn}
             </th>
           </tr>
         </thead>
@@ -208,7 +208,7 @@ class Stratum0Info extends Component {
               </td>
             ) : (
               <td>not available</td>
-            )}  
+            )}
           </tr>
         </tbody>
       </table>
