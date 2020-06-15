@@ -42,7 +42,7 @@ class Stratum0Info extends Component {
         <thead>
           <tr>
             <th className="table-title" colSpan="2">
-              Repository {this.props.repository.fqrn}
+              Repository {this.props.repositoryData.fqrn}
             </th>
           </tr>
         </thead>

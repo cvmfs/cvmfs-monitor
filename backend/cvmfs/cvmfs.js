@@ -31,9 +31,9 @@ export async function getJSONfromRepository(repositoryWebsite, repositoryName) {
     let publishedTimestamp = '';
     let stratumOneAllRevision = [];
     let hashAlgorithm = '';
-    
+
     for (const key of metainfoJson['recommended-stratum1s']) {
-        
+
         recommendedStratumOne = key.replace(`/${repositoryName}`, '').trim();
 
         // Check if recommendedStratumOne is a valid URL
@@ -48,11 +48,11 @@ export async function getJSONfromRepository(repositoryWebsite, repositoryName) {
         revision = stratumOneRepository.getRevision();
         publishedTimestamp = stratumOneRepository.getPublishedTimestamp();
         // Assign state of repository
-        if ( repositoryRevision === revision & 
-             repositoryPublishedTimestamp === publishedTimestamp 
+        if ( repositoryRevision === revision &
+             repositoryPublishedTimestamp === publishedTimestamp
            ) {
             repositoryState = 'green';
-        } else if (( repositoryRevision === revision + 1 | repositoryRevision === revision + 2 ) & 
+        } else if (( repositoryRevision === revision + 1 | repositoryRevision === revision + 2 ) &
                      repositoryPublishedTimestamp - 30 * 60 < publishedTimestamp
                   ) {
             repositoryState = 'yellow';
@@ -97,6 +97,7 @@ export async function getJSONfromRepository(repositoryWebsite, repositoryName) {
             hashAlgorithm = "SHA1";
         }
         // Create json for frontend application
+        newJson.fqrn = repositoryName;
         newJson.administrator = metainfoJson.administrator;
         newJson.email = metainfoJson.email;
         newJson.organisation = metainfoJson.organisation;
@@ -119,8 +120,8 @@ export async function getJSONfromRepository(repositoryWebsite, repositoryName) {
             whitelist: repository.whitelistURL,
             metainfo: JSON.stringify(metainfoJson)
         };
-        // newJson.rootHash = manifest.rootHash; 
-        // newJson.hashAlgorithm = hashAlgorithm; 
+        // newJson.rootHash = manifest.rootHash;
+        // newJson.hashAlgorithm = hashAlgorithm;
         newJson.rootHash = manifest.catalogHash.downloadHandle;
         newJson.hashAlgorithm = manifest.catalogHash.algorithm;
         newJson.expiryDate = repository.expiryDate;
