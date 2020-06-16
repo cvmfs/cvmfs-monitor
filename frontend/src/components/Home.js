@@ -72,7 +72,7 @@ const Intro = styled.div`
 
 class Home extends Component {
   state = { search: "" };
-  
+
   componentDidMount() {
     window.scrollTo(0, 0)
   }
@@ -91,7 +91,7 @@ class Home extends Component {
       return (
         <div key={repositories[key].fqrn}>
           <Link className="repository-name" to={"/" + repositories[key].fqrn}>
-            {repositories[key].name}
+            {repositories[key].name} ({repositories[key].fqrn})
           </Link>
         </div>
       );
