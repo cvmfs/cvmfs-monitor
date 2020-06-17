@@ -1,10 +1,11 @@
 'use strict';
 
-// import { jsSHA } from 'jssha';
 // import { crypto } from 'jsrsasign';
 import jsrsasign from 'jsrsasign';
 import { URL } from 'url';
 import { lookup } from 'dns';
+
+var jsSHA = require("jssha");
 
 export function isURLvalid(url) {
   try {
@@ -39,10 +40,10 @@ export class Hash {
     } else {
       this.hex = this.downloadHandle.substring(0, hashLength);
       this.algorithm = this.downloadHandle.substring(hashLength + 1);
-  
+
       if (this.algorithm === 'rmd160') {
         this.algorithm = 'ripemd160';
-      } 
+      }
     }
   }
 }
@@ -65,7 +66,7 @@ export function digestHex(hex, algorithm) {
   if (algorithm === undefined) {
     console.log('Error: No algorithm was specified for digestHex');
     return undefined;
-  } 
+  }
   else if (algorithm === 'shake128') {
     const shake128 = new jsSHA("SHAKE128", "HEX");
     shake128.update(hex);
