@@ -141,7 +141,7 @@ export class Retriever {
         manifest.revision === undefined) {
           console.log('Error: There is important information missing in the manifest');
           return undefined;
-    } 
+    }
 
     const metadata = data.substring(0, data.search('--'));
     const computedMetadataHash = digestString(metadata, manifest.metadataHash.algorithm);
@@ -152,7 +152,7 @@ export class Retriever {
         computedMetadataHash
       );
       return undefined;
-    } 
+    }
 
     let signature = data.substr(data.search('--') + 3 /*(--\n)*/);
     signature = signature.substr(signature.search('\n') + 1 /*\n*/);
@@ -168,14 +168,14 @@ export class Retriever {
 
   parseWhitelist(data, repoName) {
     const whitelist = new Whitelist();
-  
+
     const metadata = data.substr(0, data.search('--'));
     var metadataHashStr = data.substr(metadata.length + 3 /*(--\n)*/);
     metadataHashStr = metadataHashStr.substr(0, metadataHashStr.search('\n'));
 
     whitelist.metadataHash = new Hash(metadataHashStr);
     const computedMetadataHash = digestString(metadata, whitelist.metadataHash.algorithm);
-    
+
     if (whitelist.metadataHash.hex !== computedMetadataHash) {
       console.log(
         'Error: Whitelist metadata hash did not match the computated value:',
@@ -184,7 +184,7 @@ export class Retriever {
       );
       return undefined;
     }
-  
+
     const lines = metadata.split('\n');
 
     whitelist.repositoryName = lines[2].substr(1);
@@ -201,12 +201,12 @@ export class Retriever {
       parseInt(expiryLine.substr(7, 2)),
       parseInt(expiryLine.substr(9, 2))
     );
-    
+
     whitelist.certificateFingerprint = [];
     for (let i = 3; i < metadata.split(/\r\n|\r|\n/).length - 1; i++){
       whitelist.certificateFingerprint.push(new Hash(lines[i].replace(/\:/g, '').toLowerCase()))
     }
-    
+
     let signature = data.substring(metadata.length + 3 /*(--\n)*/);  // cut the whitelist content and the separator
     signature = signature.substring(signature.search('\n') + 1 /*(\n)*/);  // cut the hash
     whitelist.signatureHex = stringToHex(signature);
@@ -252,7 +252,7 @@ export class Retriever {
     const decompressedData = await this.cvmfsInflate(data);
     const dataHex = stringToHex(data);
     const dataHash = digestHex(dataHex, certHash.algorithm);
-    
+
     if (dataHash !== metainfoHash.hex) {
       throw new Error("The metainfoHash sums aren't equal");
     }
@@ -272,7 +272,7 @@ export class Retriever {
       console.log('Error: Data is invalid', catalogHash, data);
       return undefined;
     }
-      
+
     const decompressedData = inflate(data);
     return new SQL.Database(decompressedData);
   }

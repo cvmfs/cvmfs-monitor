@@ -4,8 +4,20 @@
 import jsrsasign from 'jsrsasign';
 
 export class KeyManager {
+  // TODO(jblomer): read keys from disk
   constructor() {
     this._pkcs8Keys = [
+      /* computecanada.ca.pub */
+      '-----BEGIN PUBLIC KEY-----\
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA00GahOvNHBpOxUz+VixZ\
+      QDoLGtCGE22nadt9J5EK9BeG0wKDEQzMlZQJCr+VFw/mdaiH72RAUnnM/OddMmMw\
+      ydKPifXt8BMrmQi/cyiAcvAAI3U9NesryXJFuGCxURFB1cSA+kToOyqMZTOrLL5V\
+      o/4xUqowksNE80X/A0z2+6RRVN478iaRqKdahhDYIN20sUUceKdLHrUCwWglomB/\
+      FptMP8y6bxCVDIPlxd8CQqpmy2Cwr8/ywof1C2vvQzEkTy0vfNGxjDFE7LDMwIB5\
+      GSIWpH3YjToXejSw1uZU4bYcushcpl01FZziBzaoYyns4HEO5scRtoPa4gNITsgB\
+      WQIDAQAB\
+      -----END PUBLIC KEY-----',
+
       /* The newest key for atlas.cern.ch*/
       '-----BEGIN PUBLIC KEY-----\
       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAukBusmYyFW8KJxVMmeCj\
@@ -81,9 +93,9 @@ export class KeyManager {
       X4/BVnilkhUfH6ssRKw4yehlKG1M5KJje2+y+iVvLbfoaw3g1Sjrf4p3Gq+ul7AC\
       PwIDAQAB\
       -----END PUBLIC KEY-----',
-      
+
       /* DESY */
-      
+
       '-----BEGIN PUBLIC KEY-----\
       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3pgrEIimdCPWG9cuhQ0d\
       ZWfYxvHRz5hL4HvQlmvikLIlHxs2EApnGyAWdaHAeQ4IiY+JXQnGsS8e5Gr2cZRb\
@@ -108,7 +120,7 @@ export class KeyManager {
   };
 
   verifyRawWithMessageHex(key, sMsgHex, hSig) {
-    hSig = hSig.replace(/[^0-9a-f]/gi, ''); 
+    hSig = hSig.replace(/[^0-9a-f]/gi, '');
     hSig = hSig.replace(/[ \n]+/g, "");
 
     const biSig = new jsrsasign.BigInteger(hSig, 16);

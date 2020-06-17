@@ -55,12 +55,12 @@ export class Repository {
     if(! this._manifest.metainfoHash) {
       throw new Error("metainfoHash is undefined");
     }
-    
+
     this.catalogURL = this.retriever.generateChunkURL(this._dataURL, this._manifest.catalogHash.downloadHandle, 'C')
     this.certificateURL = this.retriever.generateChunkURL(this._dataURL, this._manifest.certHash.downloadHandle, 'X')
     this.metainfoURL = this.retriever.generateChunkURL(this._dataURL, this._manifest.metainfoHash.downloadHandle, 'M')
 
-    this._whitelist = await this.retriever.fetchWhitelist(this.whitelistURL, this._repoName);  
+    this._whitelist = await this.retriever.fetchWhitelist(this.whitelistURL, this._repoName);
     this.certificateString = await this.retriever.fetchCertificate(this.certificateURL, this._manifest.certHash);
 
     this._cert = new jsrsasign.X509();
@@ -79,16 +79,16 @@ export class Repository {
         downloadHandleHex, // We expect the signature to RSA decrypt to this hash value
         this._whitelist.signatureHex
       );
-        
+
       if (isWhitelistVerified) {
         break;
-      }    
+      }
     }
 
     if (!isWhitelistVerified) {
       throw new Error('Unable to verify whitelist: No public key matched');
     }
-    
+
     const now = new Date();
     if (now >= this._whitelist.expiryDate) {
       // throw new Error('The whitelist is expired.');
@@ -102,21 +102,21 @@ export class Repository {
 
       let fingerprintDownloadHandle = fingerprint.downloadHandle;
       if(fingerprint.downloadHandle.includes("#")) {
-        fingerprintDownloadHandle = fingerprint.downloadHandle.substring(0, fingerprint.downloadHandle.indexOf('#')).trim();        
+        fingerprintDownloadHandle = fingerprint.downloadHandle.substring(0, fingerprint.downloadHandle.indexOf('#')).trim();
       }
 
-      const computedFingerprint = digestHex(this._cert.hex, fingerprint.algorithm);   
-        
+      const computedFingerprint = digestHex(this._cert.hex, fingerprint.algorithm);
+
       if (fingerprintDownloadHandle === computedFingerprint) {
         isCertificateFingerprintVerified = true
         break;
-      }    
+      }
     }
 
     if (!isCertificateFingerprintVerified) {
       throw new Error("Unable to verify certificate. Fingerprints don't match.");
     }
-    
+
     /* verify manifest signature */
     const signature = new jsrsasign.crypto.Signature({alg: 'SHA1withRSA'});
     signature.init(this._cert.getPublicKey());
@@ -137,7 +137,7 @@ export class Repository {
   }
 
   getManifest() {
-    return this._manifest; 
+    return this._manifest;
   }
 
   getWhitelist() {

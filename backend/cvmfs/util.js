@@ -1,10 +1,11 @@
 'use strict';
 
-// import { jsSHA } from 'jssha';
 // import { crypto } from 'jsrsasign';
 import jsrsasign from 'jsrsasign';
 import { URL } from 'url';
 import { lookup } from 'dns';
+
+var jsSHA = require("jssha");
 
 export function isURLvalid(url) {
   try {
@@ -33,16 +34,15 @@ export class Hash {
     this.downloadHandle = (downloadHandle.indexOf('#') < 0) ? downloadHandle : downloadHandle.substring(0, downloadHandle.indexOf('#')).trim();
     const hashLength = this.downloadHandle.search('-');
 
+    this.hex = this.downloadHandle;
     if (hashLength === -1) {
-      this.hex = this.downloadHandle;
       this.algorithm = 'sha1';
     } else {
-      this.hex = this.downloadHandle.substring(0, hashLength);
       this.algorithm = this.downloadHandle.substring(hashLength + 1);
-  
+
       if (this.algorithm === 'rmd160') {
         this.algorithm = 'ripemd160';
-      } 
+      }
     }
   }
 }
@@ -55,7 +55,7 @@ export function digestString(str, algorithm) {
   else if (algorithm === 'shake128') {
     const shake128 = new jsSHA("SHAKE128", "TEXT");
     shake128.update(str);
-    return shake128.getHash("HEX", {shakeLen: 160});
+    return shake128.getHash("HEX", {shakeLen: 160}) + '-shake128';
   } else {
     return jsrsasign.crypto.Util.hashString(str, algorithm);
   }
@@ -65,11 +65,11 @@ export function digestHex(hex, algorithm) {
   if (algorithm === undefined) {
     console.log('Error: No algorithm was specified for digestHex');
     return undefined;
-  } 
+  }
   else if (algorithm === 'shake128') {
     const shake128 = new jsSHA("SHAKE128", "HEX");
     shake128.update(hex);
-    return shake128.getHash("HEX", {shakeLen: 160});
+    return shake128.getHash("HEX", {shakeLen: 160}) + '-shake128';
   } else {
     return jsrsasign.crypto.Util.hashHex(hex, algorithm);
   }
