@@ -14,7 +14,7 @@ WORKDIR /root
 RUN git clone https://gitlab.cern.ch/cernvm/cvmfs-monitor.git
 
 WORKDIR /root/cvmfs-monitor/frontend
-RUN cp env.example .env
+RUN echo "REACT_APP_PRODUCTION_API=https://cvmfs-monitor-backend.web.cern.ch/api" > .env
 RUN npm install
 RUN npm run build
 
