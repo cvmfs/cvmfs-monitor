@@ -58,7 +58,7 @@ class Stratum0Info extends Component {
             )}
           </tr>
           <tr>
-            <td>Oldest Stratum1 Revision</td>
+            <td>Oldest stratum1 revision</td>
             {this.props.repositoryData.hasOwnProperty("oldestRevisionStratumOne") ? (
               <td>{this.props.repositoryData.oldestRevisionStratumOne}</td>
             ) : (
@@ -66,7 +66,7 @@ class Stratum0Info extends Component {
             )}
           </tr>
           <tr>
-            <td>Last Modified</td>
+            <td>Last modified</td>
             {this.props.repositoryData.recommendedStratum0.hasOwnProperty(
               "publishedTimestamp"
             ) ? (
@@ -82,7 +82,7 @@ class Stratum0Info extends Component {
             )}
           </tr>
           <tr>
-            <td>Whitelist Expiry Date</td>
+            <td>Whitelist expiry date</td>
             {this.props.repositoryData.hasOwnProperty("whitelistExpiryDate") ? (
               <td className={this.props.repositoryData.expiryDate ? "two-tab-elem" : "two-tab-elem error"}>
                 {this.props.repositoryData.whitelistExpiryDate}
@@ -106,7 +106,7 @@ class Stratum0Info extends Component {
           </tr>
 
           <tr className={this.state.details ? "" : "tabel-details"}>
-            <td>Url</td>
+            <td>Project url</td>
             {this.props.repositoryData.hasOwnProperty("url") ? (
               <td>{this.props.repositoryData.url}</td>
             ) : (
@@ -124,7 +124,7 @@ class Stratum0Info extends Component {
           </tr>
 
           <tr className={this.state.details ? "" : "tabel-details"}>
-            <td>rootHash</td>
+            <td>Root catalog hash</td>
             {this.props.repositoryData.hasOwnProperty("rootHash") ? (
               <td>{this.props.repositoryData.rootHash}</td>
             ) : (
@@ -133,7 +133,7 @@ class Stratum0Info extends Component {
           </tr>
 
           <tr className={this.state.details ? "" : "tabel-details"}>
-            <td>Catalog</td>
+            <td>Root catalog</td>
             {this.props.repositoryData.download.hasOwnProperty("catalog") ? (
               <td>
                 <a
