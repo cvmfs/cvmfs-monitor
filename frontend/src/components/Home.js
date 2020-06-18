@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { black, above } from "../utilities";
 import { Input } from "../elements";
 import { connect } from "react-redux";
+import { relativeTimeRounding } from "moment";
 
 const Main = styled.div`
   max-width: 1200px;
@@ -85,13 +86,26 @@ class Home extends Component {
     const { repositories } = this.props;
     const { search } = this.state;
     const orderedKeys = Object.keys(repositories).sort()
+    const fqrnStyle = {
+      width: '100%',
+      height: '100%'
+    };
+    const nameStyle = {
+      left: 0,
+      width: '100%',
+      height: '100%',
+      display: 'inline-block',
+      color: 'DarkBlue',
+      position: 'absolute',
+      'text-indent': '19em'
+    };
     console.log(repositories);
 
     const repositoriesList = orderedKeys.map(key => {
       return (
-        <div key={repositories[key].fqrn}>
+        <div key={repositories[key].fqrn} style={{position: 'relative'}}>
           <Link className="repository-name" to={"/" + repositories[key].fqrn}>
-            {repositories[key].name} ({repositories[key].fqrn})
+          <span style={fqrnStyle}>{repositories[key].fqrn}</span><span style={nameStyle}><small>{repositories[key].name}</small></span>
           </Link>
         </div>
       );
