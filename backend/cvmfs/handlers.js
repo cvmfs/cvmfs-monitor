@@ -6,7 +6,8 @@ var repolist = require('./loadrepos');
 export async function repos(req, res) {
 
     res.json({
-        repositories: repolist()
+        repositories: repolist(),
+        status: "ok",
     });
 }
 
