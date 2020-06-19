@@ -72,19 +72,12 @@ const Intro = styled.div`
 `;
 
 class Home extends Component {
-  state = { search: "" };
-
   componentDidMount() {
     window.scrollTo(0, 0)
   }
 
-  handleChange = event => {
-    this.setState({ search: event.target.value });
-  };
-
   render() {
     const { repositories } = this.props;
-    const { search } = this.state;
     const orderedKeys = Object.keys(repositories).sort()
     const fqrnStyle = {
       width: '100%',
@@ -128,11 +121,6 @@ class Home extends Component {
           </ol>
         </Intro>
         <Title2>Registered Repositories</Title2>
-        <Input
-          onChange={this.handleChange}
-          value={search}
-          placeholder="search"
-        />
         <div className="list">{repositoriesList}</div>
       </Main>
     );
