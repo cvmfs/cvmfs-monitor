@@ -23,10 +23,11 @@ app.use(function (req, res, next) {
 });
 
 const port = process.env.PORT;
-app.listen(port, () => `Server running on port ${port}`);
+const api_path = process.env.API_PATH;
+app.listen(port, () => `Server running on port ${port} with API on ${api_path}`);
 
-app.get("/api/repos", handlers.repos);
-app.get("/api/details/:repo", handlers.details);
-app.get("/api/stat/:repo", handlers.stat);
-app.get("/api/stat/:repo/:path([^?]+)", handlers.stat);
-app.get("/api/fetch/:repo/:path([^?]+)", handlers.fetch);
+app.get(api_path + "/repos", handlers.repos);
+app.get(api_path + "/details/:repo", handlers.details);
+app.get(api_path + "/stat/:repo", handlers.stat);
+app.get(api_path + "/stat/:repo/:path([^?]+)", handlers.stat);
+app.get(api_path + "/fetch/:repo/:path([^?]+)", handlers.fetch);
