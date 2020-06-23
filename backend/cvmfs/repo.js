@@ -60,8 +60,17 @@ export class Repository {
     this.certificateURL = this.retriever.generateChunkURL(this._dataURL, this._manifest.certHash.downloadHandle, 'X')
     this.metainfoURL = this.retriever.generateChunkURL(this._dataURL, this._manifest.metainfoHash.downloadHandle, 'M')
 
-    this._whitelist = await this.retriever.fetchWhitelist(this.whitelistURL, this._repoName);
-    this.certificateString = await this.retriever.fetchCertificate(this.certificateURL, this._manifest.certHash);
+    const metainfoPromise = this.retriever.fetchMetainfo(this.metainfoURL, this._manifest.metainfoHash, this._manifest.certHash);
+    const whitelistPromise = this.retriever.fetchWhitelist(this.whitelistURL, this._repoName);
+    const certificatePromise = this.retriever.fetchCertificate(this.certificateURL, this._manifest.certHash);
+    const stratum1MetainfoPromise = this.retriever.downloadMetainfoStratumOne(this._baseURL);
+    // const stratum1Repolist = this.retriever.downloadRepolistStratumOne(this._baseURL);
+
+    this._metainfo =  await metainfoPromise;
+    this._whitelist = await whitelistPromise;
+    this.certificateString = await certificatePromise;
+    this._metainfoForStratumOne = await stratum1MetainfoPromise;
+    // this._repolistForStratumOne = await stratum1Repolist;
 
     this._cert = new jsrsasign.X509();
     this._cert.readCertPEM(this.certificateString);
@@ -130,10 +139,8 @@ export class Repository {
       throw new Error("metainfoHash is undefined");
     }
 
-    this._metainfo =  await this.retriever.fetchMetainfo(this.metainfoURL, this._manifest.metainfoHash, this._manifest.certHash);
     this._revision =  this._manifest.revision;
     this._publishedTimestamp =  this._manifest.publishedTimestamp;
-    this._metainfoForStratumOne =  await this.retriever.downloadMetainfoStratumOne(this._baseURL);
   }
 
   getManifest() {
@@ -162,5 +169,9 @@ export class Repository {
 
   getMetainfoForStratumOne() {
     return this._metainfoForStratumOne;
+  }
+
+  getRepolistForStratumOne() {
+    return this._repolistForStratumOne;
   }
 }

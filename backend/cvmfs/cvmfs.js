@@ -2,6 +2,36 @@ import { Repository } from './repo.js';
 import { isURLvalid, lookupIPfromURL } from './util.js';
 import geoip from 'geoip-lite';
 
+async function getStratum1JSON(stratumOne, repositoryName) {
+    const stratumOneBaseUrl = stratumOne.replace(`/${repositoryName}`, '').trim();
+
+    // Check if stratumOneBaseUrl is a valid URL
+    if(! isURLvalid(stratumOneBaseUrl)) {
+        throw new Error(`Stratum 1 URL is invalid: '${stratumOneBaseUrl}'`);
+    }
+
+    const stratumOneRepository = new Repository(stratumOneBaseUrl, repositoryName)
+
+    await stratumOneRepository.connect();
+
+    const revision = stratumOneRepository.getRevision();
+    const publishedTimestamp = stratumOneRepository.getPublishedTimestamp();
+
+    const metainfoForStratumOne = stratumOneRepository.getMetainfoForStratumOne();
+    const metainfoForStratumOneJson = JSON.parse(metainfoForStratumOne)
+
+    const ip = await lookupIPfromURL(stratumOneRepository._baseURL);
+    const geo = await geoip.lookup(ip);
+
+    return {
+        url: stratumOneRepository._baseURL,
+        revision: revision,
+        publishedTimestamp: publishedTimestamp,
+        name: metainfoForStratumOneJson.organisation,
+        location: geo,
+    };
+}
+
 export async function getJSONfromRepository(repositoryWebsite, repositoryName) {
 
     let repository = new Repository(repositoryWebsite, repositoryName);
@@ -14,14 +44,7 @@ export async function getJSONfromRepository(repositoryWebsite, repositoryName) {
     const repositoryRevision = repository.getRevision();
     const repositoryPublishedTimestamp = repository.getPublishedTimestamp();
 
-    // console.log('------------------------------------------------------------------');
-    // console.log(manifest);
-    // console.log(manifest.rootHash);
-    // console.log(whitelist);
-    // console.log(repository.getCertificate());
-    // console.log(metainfoJson);
-
-    let newJson = {};
+    let resultJson = {};
     let recommendedStratumOne = '';
     let revision = '';
     let stratumOne = [];
@@ -32,99 +55,87 @@ export async function getJSONfromRepository(repositoryWebsite, repositoryName) {
     let stratumOneAllRevision = [];
     let hashAlgorithm = '';
 
-    for (const key of metainfoJson['recommended-stratum1s']) {
-
-        recommendedStratumOne = key.replace(`/${repositoryName}`, '').trim();
-
-        // Check if recommendedStratumOne is a valid URL
-        if(! isURLvalid(recommendedStratumOne)) {
-            throw new Error(`Stratum 1 URL is invalid: '${recommendedStratumOne}'`);
-        }
-
-        const stratumOneRepository = new Repository(recommendedStratumOne, repositoryName)
-
-        await stratumOneRepository.connect();
-
-        revision = stratumOneRepository.getRevision();
-        publishedTimestamp = stratumOneRepository.getPublishedTimestamp();
-        // Assign state of repository
-        if ( repositoryRevision === revision &
-             repositoryPublishedTimestamp === publishedTimestamp
-           ) {
-            repositoryState = 'green';
-        } else if (( repositoryRevision === revision + 1 | repositoryRevision === revision + 2 ) &
-                     repositoryPublishedTimestamp - 30 * 60 < publishedTimestamp
-                  ) {
-            repositoryState = 'yellow';
-        } else if ( repositoryRevision !== revision &
-                    repositoryPublishedTimestamp - 30 * 60 > publishedTimestamp
-                  ) {
-            repositoryState = 'red';
-        };
-
-        const metainfoForStratumOne = stratumOneRepository.getMetainfoForStratumOne();
-        const metainfoForStratumOneJson = JSON.parse(metainfoForStratumOne)
-
-        const ip = await lookupIPfromURL(stratumOneRepository._baseURL);
-        const geo = await geoip.lookup(ip);
-
-        stratumOne.push({
-            url: stratumOneRepository._baseURL,
-            revision: revision,
-            health: repositoryState,
-            id: i++,
-            publishedTimestamp: publishedTimestamp,
-            name: metainfoForStratumOneJson.organisation,
-            location: geo
-        });
-
-        stratumOneAllRevision.push(revision);
-
-        // Chceck revisoin for all stratumOne repositoris
-        if (stratumOne.find(x => x.health.includes('red'))) {
-            healthStratumOne = 'red';
-        } else if (stratumOne.find(x => x.health.includes('yellow') && !x.health.includes('red'))) {
-            healthStratumOne = 'yellow';
-        } else if (stratumOne.find(x => x.health.includes('green') && !x.health.includes('yellow') && !x.health.includes('red'))) {
-            healthStratumOne = 'green';
-        }
-        // Check algorithm
-        if (manifest.rootHash.includes("rmd160")) {
-            hashAlgorithm = "rmd160";
-        } else if (manifest.rootHash.includes("shake128")) {
-            hashAlgorithm = "shake128";
-        } else {
-            hashAlgorithm = "SHA1";
-        }
-        // Create json for frontend application
-        newJson.fqrn = repositoryName;
-        newJson.administrator = metainfoJson.administrator;
-        newJson.email = metainfoJson.email;
-        newJson.organisation = metainfoJson.organisation;
-        newJson.description = metainfoJson.description;
-        newJson.url = metainfoJson.url;
-        newJson.recommendedStratum0 = {
-            url: metainfoJson['recommended-stratum0'],
-            revision: repositoryRevision,
-            publishedTimestamp: repositoryPublishedTimestamp
-        };
-        newJson.recommendedStratum1s = stratumOne;
-        newJson.custom = metainfoJson.custom;
-        newJson.health = healthStratumOne;
-        newJson.oldestRevisionStratumOne = Math.min(...stratumOneAllRevision);
-        newJson.whitelistExpiryDate = whitelist.expiryDate;
-        newJson.download = {
-            catalog: repository.catalogURL,
-            certificate: repository.certificateString,
-            manifest: repository.manifestURL,
-            whitelist: repository.whitelistURL,
-            metainfo: JSON.stringify(metainfoJson)
-        };
-        // newJson.rootHash = manifest.rootHash;
-        // newJson.hashAlgorithm = hashAlgorithm;
-        newJson.rootHash = manifest.catalogHash.downloadHandle;
-        newJson.hashAlgorithm = manifest.catalogHash.algorithm;
-        newJson.expiryDate = repository.expiryDate;
+    resultJson.fqrn = repositoryName;
+    resultJson.administrator = metainfoJson.administrator;
+    resultJson.email = metainfoJson.email;
+    resultJson.organisation = metainfoJson.organisation;
+    resultJson.description = metainfoJson.description;
+    resultJson.url = metainfoJson.url;
+    resultJson.custom = metainfoJson.custom;
+    resultJson.download = {
+        catalog: repository.catalogURL,
+        certificate: repository.certificateString,
+        manifest: repository.manifestURL,
+        whitelist: repository.whitelistURL,
+        metainfo: JSON.stringify(metainfoJson),
     };
-    return newJson;
+    resultJson.whitelistExpiryDate = whitelist.expiryDate;
+    // resultJson.rootHash = manifest.rootHash;
+    // resultJson.hashAlgorithm = hashAlgorithm;
+    resultJson.rootHash = manifest.catalogHash.downloadHandle;
+    resultJson.hashAlgorithm = manifest.catalogHash.algorithm;
+    resultJson.expiryDate = repository.expiryDate;
+    resultJson.recommendedStratum0 = {
+        url: metainfoJson['recommended-stratum0'],
+        revision: repositoryRevision,
+        publishedTimestamp: repositoryPublishedTimestamp
+    };
+
+    let stratum1Promises = [];
+
+    // Kick off Stratum1 info retrieval in parallel
+    for (const key of metainfoJson['recommended-stratum1s']) {
+        stratum1Promises.push(getStratum1JSON(key, repositoryName));
+    }
+
+    // Gather Stratum1 info
+    for (const stratum1Promise of stratum1Promises) {
+        let stratum1JSON = await stratum1Promise;
+
+        let stratum1Health = '';
+        // Assign state of repository
+        if ( repositoryRevision === stratum1JSON.revision &
+            repositoryPublishedTimestamp === stratum1JSON.publishedTimestamp
+        ) {
+            stratum1Health = 'green';
+        } else if (( repositoryRevision === stratum1JSON.revision + 1 | repositoryRevision === stratum1JSON.revision + 2 ) &
+                    repositoryPublishedTimestamp - 30 * 60 < stratum1JSON.publishedTimestamp
+                ) {
+            stratum1Health = 'yellow';
+        } else if ( repositoryRevision !== revision &
+                    repositoryPublishedTimestamp - 30 * 60 > stratum1JSON.publishedTimestamp
+                ) {
+            stratum1Health = 'red';
+        };
+
+        stratum1JSON['health'] = stratum1Health;
+
+        stratumOne.push(stratum1JSON);
+
+        stratumOneAllRevision.push(stratum1JSON.revision);
+
+    };
+
+    // Chceck revisoin for all stratumOne repositoris
+    if (stratumOne.find(x => x.health.includes('red'))) {
+        healthStratumOne = 'red';
+    } else if (stratumOne.find(x => x.health.includes('yellow') && !x.health.includes('red'))) {
+        healthStratumOne = 'yellow';
+    } else if (stratumOne.find(x => x.health.includes('green') && !x.health.includes('yellow') && !x.health.includes('red'))) {
+        healthStratumOne = 'green';
+    }
+    // Check algorithm
+    // if (manifest.rootHash.includes("rmd160")) {
+    //     hashAlgorithm = "rmd160";
+    // } else if (manifest.rootHash.includes("shake128")) {
+    //     hashAlgorithm = "shake128";
+    // } else {
+    //     hashAlgorithm = "SHA1";
+    // }
+
+    resultJson.recommendedStratum1s = stratumOne;
+    resultJson.health = healthStratumOne;
+    resultJson.oldestRevisionStratumOne = Math.min(...stratumOneAllRevision);
+
+    return resultJson;
 }
