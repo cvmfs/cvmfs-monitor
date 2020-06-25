@@ -29,6 +29,9 @@ async function getStratum1JSON(stratumOne, repositoryName) {
         publishedTimestamp: publishedTimestamp,
         name: metainfoForStratumOneJson.organisation,
         location: geo,
+        last_gc: stratumOneRepository.getLastGc(),
+        last_snapshot: stratumOneRepository.getLastSnapshot(),
+        passthrough: stratumOneRepository.getPassthrough(),
     };
 }
 

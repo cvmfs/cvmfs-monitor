@@ -76,6 +76,11 @@ export class Retriever {
     return await this.download(url);
   }
 
+  async downloadCvmfsStatus(repo_url, repo_name) {
+    const url = repo_url + "/" + repo_name + "/.cvmfs_status.json";
+    return await this.download(url);
+  }
+
   generateChunkURL(data_url, hash, suffix='') {
     return [data_url, '/', hash.substr(0, 2), '/', hash.substr(2), suffix].join('');
   }

@@ -64,13 +64,16 @@ export class Repository {
     const whitelistPromise = this.retriever.fetchWhitelist(this.whitelistURL, this._repoName);
     const certificatePromise = this.retriever.fetchCertificate(this.certificateURL, this._manifest.certHash);
     const stratum1MetainfoPromise = this.retriever.downloadMetainfoStratumOne(this._baseURL);
-    // const stratum1Repolist = this.retriever.downloadRepolistStratumOne(this._baseURL);
+    const cvmfsStatusPromise = this.retriever.downloadCvmfsStatus(this._baseURL, this._repoName);
+    const stratum1Repolist = this.retriever.downloadRepolistStratumOne(this._baseURL);
+
 
     this._metainfo =  await metainfoPromise;
     this._whitelist = await whitelistPromise;
     this.certificateString = await certificatePromise;
     this._metainfoForStratumOne = await stratum1MetainfoPromise;
-    // this._repolistForStratumOne = await stratum1Repolist;
+    this._cvmfsStatusJson = JSON.parse(await cvmfsStatusPromise);
+    this._repolistForStratumOneJson = JSON.parse(await stratum1Repolist);
 
     this._cert = new jsrsasign.X509();
     this._cert.readCertPEM(this.certificateString);
@@ -141,6 +144,23 @@ export class Repository {
 
     this._revision =  this._manifest.revision;
     this._publishedTimestamp =  this._manifest.publishedTimestamp;
+    this._last_gc = Date.parse(this._cvmfsStatusJson.last_gc) / 1000;
+    this._last_snapshot = Date.parse(this._cvmfsStatusJson.last_snapshot) / 1000;
+
+    try {
+      this._repolistForStratumOneJson.replicas.foreach( function(repo) {
+        if (repo.name == this._repoName) {
+          if (repo["pass-through"] == "true") {
+            this._passthrough = true;
+          } else {
+            this._passthrough = false;
+          }
+        }
+      });
+    }
+    catch(err) {
+      this._passthrough = false;
+    }
   }
 
   getManifest() {
@@ -171,7 +191,15 @@ export class Repository {
     return this._metainfoForStratumOne;
   }
 
-  getRepolistForStratumOne() {
-    return this._repolistForStratumOne;
+  getLastSnapshot() {
+    return this._last_snapshot;
+  }
+
+  getLastGc() {
+    return this._last_gc;
+  }
+
+  getPassthrough() {
+    return this._passthrough;
   }
 }
