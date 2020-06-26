@@ -55,8 +55,8 @@ export async function fetch(req, res) {
     let repoName = req.params.repo;
     let path = "/" + ((typeof req.params.path !== "undefined") ? req.params.path : "");
     try {
-        let result = libcvmfs.stat(repoName, path);
-        let fd = libcvmfs.open(repoName, path);
+        var result = libcvmfs.stat(repoName, path);
+        var fd = libcvmfs.open(repoName, path);
     } catch(err) {
         let answer = {
             status: "error",
