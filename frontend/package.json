@@ -15,9 +15,9 @@
     "react-leaflet": "^2.4.0",
     "react-redux": "^7.1.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "3.4.0",
+    "react-scripts": "^3.4.1",
     "redux": "^4.0.4",
-    "serve": "^11.3.0",
+    "serve": "^11.3.2",
     "styled-components": "^4.3.2",
     "styled-components-modifiers": "^1.2.4"
   },
