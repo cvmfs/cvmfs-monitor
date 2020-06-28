@@ -9,7 +9,7 @@ const Footer = ({ className }) => {
         <a className="copyright" href="https://copyright.web.cern.ch/">
           Copyright
         </a>
-        © 2019 CERN
+        © 2020 CERN
       </div>
     </footer>
   );

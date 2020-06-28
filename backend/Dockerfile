@@ -43,7 +43,7 @@ RUN chown -R cvmfs-monitor:cvmfs-monitor /root/cvmfs-monitor/
 USER cvmfs-monitor
 WORKDIR /root/cvmfs-monitor/backend
 RUN git submodule init
-RUN npm install
+RUN npm ci
 RUN npm run build
 RUN npm run build-addon
 
