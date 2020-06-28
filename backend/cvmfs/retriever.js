@@ -274,16 +274,4 @@ export class Retriever {
     const dataHash = digestHex(dataHex, hash.algorithm);
     return dataHash === hash.hex;
   }
-
-  async fetchCatalog (catalogURL, catalogHash) {
-    const data = await this.download(catalogURL);
-
-    if (!this.dataIsValid(data, catalogHash)) {
-      console.log('Error: Data is invalid', catalogHash, data);
-      return undefined;
-    }
-
-    const decompressedData = inflate(data);
-    return new SQL.Database(decompressedData);
-  }
 }

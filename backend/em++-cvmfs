@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -e
-
-SRC_DIR="$( cd "$( dirname "$0" )" && pwd )"
-
-$SRC_DIR/emcc-cvmfs em++ $*
