@@ -1,17 +1,14 @@
 import styled from "styled-components";
 import {
   black,
+  blue,
   shipGrey,
   athensGrey,
   grey,
   gravel,
   roboto,
-  // green,
   red,
-  // yellow,
   above,
-  // white,
-  // gray
 } from "../utilities";
 
 export default styled.div`
@@ -21,6 +18,10 @@ export default styled.div`
   ${above.desktop`
     margin: 0 auto;
   `}
+
+  a, a:visited, a:hover, a:active {
+    color: ${blue};
+  }
 
   table {
     margin: 20px 0px;

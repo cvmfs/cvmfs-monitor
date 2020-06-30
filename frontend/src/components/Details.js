@@ -101,7 +101,7 @@ class Details extends Component {
         this.setState({ repositoryData: repositoryDownloadData, isLoading: false });
       })
       .catch(error => {
-        this.setState({ 
+        this.setState({
           isLoading: false,
           error: true,
           errorMessage: error.response !== undefined ? error.response.data : "" });

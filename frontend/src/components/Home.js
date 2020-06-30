@@ -2,9 +2,7 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { black, above } from "../utilities";
-import { Input } from "../elements";
 import { connect } from "react-redux";
-import { relativeTimeRounding } from "moment";
 
 const Main = styled.div`
   max-width: 1200px;

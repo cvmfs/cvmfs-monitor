@@ -2,40 +2,38 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 
+import prettyBytes from "pretty-bytes";
 
 import Alert from "../elements/Alert";
 import Title from "../elements/Title";
 import Box from "../elements/Box";
 import Page from "../elements/Page";
-// import { Button } from "../elements";
-// import { Path } from "leaflet";
+import { Button } from "../elements";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import {
-  // black,
-  // shipGrey,
-  // athensGrey,
-  // grey,
-  // gravel,
-  // roboto,
-  // green,
-  // red,
-  // yellow,
-  // above,
-  // white,
-  gray
+  gray,
+  athensGrey,
+  black,
 } from "../utilities";
 
 import {
-  // faTimes,
-  // faCheck,
-  // faAngleDown,
-  // faAngleUp,
-  // faExclamationTriangle,
+  faAngleDown,
+  faAngleUp,
   faSpinner,
   faFile,
-  faFolder
+  faFolder,
+  faLink,
 } from "@fortawesome/free-solid-svg-icons";
+
+const nameColspan = 6;
+const sizeColspan = 2;
+const lastModifiedColspan = 2;
+
+function formatDate(unixTimestamp) {
+  let d = new Date(unixTimestamp * 1000);
+  return d.toUTCString();
+};
 
 class Browser extends Component {
   constructor(props) {
@@ -44,6 +42,8 @@ class Browser extends Component {
       currentPath: "",
       stat: null,
       isLoading: true,
+      showCounters: false,
+      counters: {},
     };
   }
 
@@ -74,8 +74,14 @@ class Browser extends Component {
       this.setState({
         currentPath: path,
         stat: result.data,
-        isLoading: false
+        isLoading: false,
       });
+
+      if(path === "") {
+        this.setState({
+          counters: result.data.catalog.counters,
+        });
+      }
     })
     .catch(error => {
       this.setState({ error: true });
@@ -115,16 +121,56 @@ class Browser extends Component {
       );
     } else {
       return (
-        <Box>     
+        <Box>
           <Title>Repository browser - {this.props.repository.fqrn}</Title>
           <Alert>INTERACTIVE USE ONLY - please do not use this browser in your scripts,
             as it is not designed to handle large number of requests.</Alert>
           <table>
             <thead>
               <tr>
-                <th classname="table-title" colspan="2">
+                <th className="table-title" colSpan={2}>
                   current path : {this.state.currentPath}
+                  <Button style={{background: athensGrey, color: black, float: "right", padding: "1px 10px"}}
+                          onClick={this.handleToggleCounters} >
+                    counters
+                    {
+                      this.state.showCounters ? (
+                        <FontAwesomeIcon
+                          icon={faAngleUp}
+                          style={{ color: black, paddingLeft: 10 }}
+                        />
+                      ) : (
+                        <FontAwesomeIcon
+                          icon={faAngleDown}
+                          style={{ color: black, paddingLeft: 10 }}
+                        />
+                      )
+                    }
+                  </Button>
                 </th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                this.state.showCounters === true ? (
+                  this.formatCounters(this.state.counters).map(([name, val]) => (
+                    <tr>
+                      <td>{name}</td>
+                      <td>{val}</td>
+                    </tr>
+                  ))
+                ) : (
+                  ""
+                )
+              }
+            </tbody>
+          </table>
+          <table>
+            <thead>
+              <tr>
+                <th colspan={nameColspan}>name</th>
+                <th colspan={sizeColspan}>size</th>
+                <th colspan={lastModifiedColspan}>last modified</th>
               </tr>
             </thead>
             <tbody>
@@ -132,8 +178,12 @@ class Browser extends Component {
                 this.state.currentPath !== "" ?
                 (
                   <tr>
-                    <td>
+                    <td colspan={nameColspan}>
                       <a href="#" onClick={() => this.updatePathRelative("..")}>..</a>
+                    </td>
+                    <td colspan={sizeColspan}>
+                    </td>
+                    <td colspan={lastModifiedColspan}>
                     </td>
                   </tr>
                 ) : (
@@ -141,23 +191,36 @@ class Browser extends Component {
                 )
               }
               {this.state.stat.ls.map(object => (
-                <tr>
-                  <td>
-                    {
-                      object.is_dir === true ? (
-                        <a href="#" onClick={() => this.updatePathRelative(object.name)}>
-                          <FontAwesomeIcon icon={faFolder} /> {object.name}
-                        </a>
-                      ) : (
-                        <a href={this.getFetchLinkRelative(object.name)}>
-                          <FontAwesomeIcon icon={faFile} /> {object.name}
-                        </a>
-                      )
-                    }
-                  </td>
-                </tr>
+                <>
+                  <tr>
+                    <td colspan={nameColspan}>
+                      {
+                        object.is_dir === true ? (
+                          <a href="#" onClick={() => this.updatePathRelative(object.name)}>
+                            <FontAwesomeIcon icon={faFolder} color={black} /> {object.name}
+                          </a>
+                        ) : (
+                          object.is_link === true ? (
+                            <>
+                              <FontAwesomeIcon icon={faLink} color={black} /> {object.name}
+                            </>
+                          ) : (
+                            <a href={this.getFetchLinkRelative(object.name)}>
+                              <FontAwesomeIcon icon={faFile} color={black} /> {object.name}
+                            </a>
+                          )
+                        )
+                      }
+                    </td>
+                    <td colspan={sizeColspan}>
+                      {prettyBytes(object.size)}
+                    </td>
+                    <td colspan={lastModifiedColspan}>
+                      {formatDate(object.mtime)}
+                    </td>
+                  </tr>
+                </>
               ))
-
               }
             </tbody>
           </table>
@@ -165,6 +228,29 @@ class Browser extends Component {
       );
     }
   }
+
+  handleToggleCounters = () => {
+    this.setState(state => ({
+      showCounters: !state.showCounters
+    }));
+  }
+
+  formatCounters(counters) {
+    let result = [
+      ["Regular files", counters.regular],
+      ["Directories", counters.dir],
+      ["Symlinks", counters.symlink],
+      ["Nested catalogs", counters.nested],
+      ["Chunked files", counters.chunked],
+      ["File chunks", counters.chunks],
+      ["Total file size", prettyBytes(counters.file_size)],
+      ["Size of chunked files", prettyBytes(counters.chunked_size)],
+      ["External files", counters.external],
+      ["External file size", prettyBytes(counters.external_file_size)],
+    ];
+    return result;
+  }
+
 }
 
 const mapStateToProps = (state, ownProps) => {

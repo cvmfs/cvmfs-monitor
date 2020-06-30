@@ -2,28 +2,13 @@ import React, { Component } from "react";
 import moment from "moment";
 import { Button } from "../elements";
 import {
-  // faTimes,
-  // faCheck,
   faAngleDown,
   faAngleUp,
-  // faExclamationTriangle,
-  // faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 
 
 import {
-  // black,
-  // shipGrey,
-  // athensGrey,
-  // grey,
-  // gravel,
-  // roboto,
-  // green,
-  // red,
-  // yellow,
-  // above,
   white,
-  // gray
 } from "../utilities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
