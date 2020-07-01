@@ -15,6 +15,7 @@ import {
   gray,
   athensGrey,
   black,
+  darkerGray,
 } from "../utilities";
 
 import {
@@ -219,6 +220,7 @@ class Browser extends Component {
                           object.is_link === true ? (
                             <>
                               <FontAwesomeIcon icon={faLink} color={black} /> {object.name}
+                              <span style={{float: "right", color: darkerGray}}>{object.link_dest}</span>
                             </>
                           ) : (
                             <a href={this.getFetchLinkRelative(object.name)}>

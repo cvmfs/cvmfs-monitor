@@ -2,6 +2,7 @@ export const white = "#fff";
 export const gray = "#292929";
 export const whiteSmoke = "#f8f8f8";
 export const darkGray = "#A9A9A9";
+export const darkerGray = "#787878";
 export const black = "#000";
 export const shipGrey = "#423c49";
 export const athensGrey = "#ECEEF5";
