@@ -24,7 +24,9 @@ import {
   faFile,
   faFolder,
   faLink,
+  faDatabase,
 } from "@fortawesome/free-solid-svg-icons";
+import ReactTooltip from "react-tooltip";
 
 const nameColspan = 6;
 const sizeColspan = 2;
@@ -196,9 +198,23 @@ class Browser extends Component {
                     <td colspan={nameColspan}>
                       {
                         object.is_dir === true ? (
-                          <a href="#" onClick={() => this.updatePathRelative(object.name)}>
-                            <FontAwesomeIcon icon={faFolder} color={black} /> {object.name}
-                          </a>
+                          <>
+                            <a href="#" onClick={() => this.updatePathRelative(object.name)}>
+                              <FontAwesomeIcon icon={faFolder} color={black} /> {object.name}
+                            </a>
+                            {
+                              object.is_catalog === true ? (
+                                <>
+                                  <ReactTooltip />
+                                  <FontAwesomeIcon
+                                    title="directory contains a nested catalog"
+                                    style={{paddingLeft: 5}} icon={faDatabase} color={gray} />
+                                </>
+                              ) : (
+                                ""
+                              )
+                            }
+                          </>
                         ) : (
                           object.is_link === true ? (
                             <>
