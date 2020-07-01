@@ -4,12 +4,14 @@
 #include <map>
 #include <sstream>
 
+const unsigned int kMaxPathLen = 2000;
+
 cvmfs_option_map *g_opts;
 cvmfs_context *g_ctx;
 
 std::map <std::string, cvmfs_context *> g_attached_repos;
 
-bool AttachRepo(const std::string repo, Napi::Env env) {
+bool AttachRepo(const std::string &repo, Napi::Env env) {
   cvmfs_option_map *opts = cvmfs_options_clone(g_opts);
   cvmfs_options_parse_default(opts, repo.c_str());
   cvmfs_context *context;
@@ -149,6 +151,37 @@ Napi::Value Stat(const Napi::CallbackInfo &info) {
     for (size_t i = 0; i < listlen; ++i) {
       Napi::Object cur_obj = Napi::Object::New(env);
       FillStat(&buf[i], &cur_obj);
+      // Fill in additional info for symlinks
+      std::string abspath = path + "/" + buf[i].name;
+      if (S_ISLNK(buf[i].info.st_mode)) {
+        char linkdest[kMaxPathLen];
+        int retval = cvmfs_readlink(ctx, abspath.c_str(),
+                                    linkdest, kMaxPathLen);
+        if (retval == 0) {
+          cur_obj.Set("link_dest", std::string(linkdest));
+          // struct stat dest_stat;
+          // retval = cvmfs_stat(ctx, linkdest, &dest_stat);
+          // if (retval == 0) {
+          //   cur_obj.Set("link_dest_isdir", S_ISDIR(dest_stat.st_mode));
+          //   cur_obj.Set("link_dest_isfile", S_ISREG(dest_stat.st_mode));
+          // } else {
+          //   cur_obj.Set("link_dest_isdir", false);
+          //   cur_obj.Set("link_dest_isfile", false);
+          // }
+        } else {
+          fprintf(stderr, "Failed to resolve symlink %s:%s\n",
+                  repo.c_str(), abspath.c_str());
+        }
+      } else if (S_ISDIR(buf[i].info.st_mode)) {
+        cvmfs_nc_attr nc;
+        int retval = cvmfs_stat_nc(ctx, abspath.c_str(), &nc);
+        if (retval == 0 && std::string(nc.mountpoint) == abspath) {
+          cur_obj.Set("is_catalog", true);
+          // TODO: add subcatalog counters
+        } else {
+          cur_obj.Set("is_catalog", false);
+        }
+      }
       list[i] = cur_obj;
     }
     result.Set("ls", list);
