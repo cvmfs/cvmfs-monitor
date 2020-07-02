@@ -27,8 +27,8 @@ RUN curl https://ecsft.cern.ch/dist/cvmfs/builddeps/computecanada.ca.pub > /etc/
 # https://github.com/airnandez/sw-lsst-eu/releases/download/v0.7/cvmfs-config-lsst-0.7-1.noarch.rpm
 RUN mkdir /etc/cvmfs/keys/lsst.eu
 RUN echo "CVMFS_KEYS_DIR=/etc/cvmfs/keys/lsst.eu" > /etc/cvmfs/domain.d/lsst.eu.conf
-RUN echo "CVMFS_SERVER_URL='http://cclssts1.in2p3.fr/cvmfs/@fqrn@;http://cvmfs-stratum-one.cern.ch/cvmfs/@fqrn@;http://cvmfs-s1goc.opensciencegrid.org/cvmfs/@fqrn@" >> /etc/cvmfs/domain.d/lsst.eu.conf
-RUN curl https://ecsft.cern.ch/dist/cvmfs/builddeps/lsst.eu.pub > /etc/cvmfs/keys/computecanada.ca/lsst.eu.pub
+RUN echo "CVMFS_SERVER_URL='http://cclssts1.in2p3.fr/cvmfs/@fqrn@;http://cvmfs-stratum-one.cern.ch/cvmfs/@fqrn@;http://cvmfs-s1goc.opensciencegrid.org/cvmfs/@fqrn@'" >> /etc/cvmfs/domain.d/lsst.eu.conf
+RUN curl https://ecsft.cern.ch/dist/cvmfs/builddeps/lsst.eu.pub > /etc/cvmfs/keys/lsst.eu/lsst.eu.pub
 
 
 RUN mkdir -p /var/lib/cvmfs/libcvmfs
