@@ -30,6 +30,13 @@ RUN echo "CVMFS_KEYS_DIR=/etc/cvmfs/keys/lsst.eu" > /etc/cvmfs/domain.d/lsst.eu.
 RUN echo "CVMFS_SERVER_URL='http://cclssts1.in2p3.fr/cvmfs/@fqrn@;http://cvmfs-stratum-one.cern.ch/cvmfs/@fqrn@;http://cvmfs-s1goc.opensciencegrid.org/cvmfs/@fqrn@'" >> /etc/cvmfs/domain.d/lsst.eu.conf
 RUN curl https://ecsft.cern.ch/dist/cvmfs/builddeps/lsst.eu.pub > /etc/cvmfs/keys/lsst.eu/lsst.eu.pub
 
+# TODO: install through proper configuration repo
+# https://confluence.desy.de/display/grid/CVMFS+repositories?preview=/159747860/159747863/desy.de.pub
+RUN mkdir /etc/cvmfs/keys/desy.de
+RUN echo "CVMFS_KEYS_DIR=/etc/cvmfs/keys/desy.de" > /etc/cvmfs/domain.d/desy.de.conf
+RUN echo "CVMFS_SERVER_URL='http://grid-cvmfs-one.desy.de:8000/cvmfs/@fqrn@'" >> /etc/cvmfs/domain.d/desy.de.conf
+RUN curl https://ecsft.cern.ch/dist/cvmfs/builddeps/desy.de.pub > /etc/cvmfs/keys/desy.de/desy.de.pub
+
 
 RUN mkdir -p /var/lib/cvmfs/libcvmfs
 RUN chmod -R 777 /var/lib/cvmfs
