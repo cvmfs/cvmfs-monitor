@@ -13,9 +13,10 @@ cvmfs_option_map *g_opts;
 cvmfs_context *g_ctx;
 
 struct AttachedRepository {
-  cvmfs_context *ctx;
+  cvmfs_context *ctx = nullptr;
   // When to check next time for remount
-  time_t timeout_deadline;
+  time_t timeout_deadline = 0;
+  uint64_t revision = 0;
 };
 
 std::map <std::string, AttachedRepository> g_attached_repos;
@@ -37,13 +38,15 @@ bool AttachRepo(const std::string &repo, Napi::Env env) {
   AttachedRepository ar;
   ar.ctx = context;
   ar.timeout_deadline = time(NULL) + kDefaultTimeout;
+  ar.revision = cvmfs_get_revision(context);
   g_attached_repos[repo] = ar;
   return true;
 }
 
-cvmfs_context *GetRepoCtx(const std::string repo, Napi::Env env) {
+AttachedRepository GetRepo(const std::string repo, Napi::Env env) {
   if (g_attached_repos.count(repo) == 0) {
-    if (!AttachRepo(repo, env)) return NULL;
+    if (!AttachRepo(repo, env))
+      return AttachedRepository();
   }
   if (time(NULL) > g_attached_repos[repo].timeout_deadline) {
     printf("[INF]: remounting %s due to timeout\n", repo.c_str());
@@ -56,7 +59,7 @@ cvmfs_context *GetRepoCtx(const std::string repo, Napi::Env env) {
       g_attached_repos[repo].timeout_deadline = time(NULL) + kDefaultTimeout;
     }
   }
-  return g_attached_repos[repo].ctx;
+  return g_attached_repos[repo];
 }
 
 void FillStat(cvmfs_stat_t *st, Napi::Object *obj) {
@@ -139,7 +142,8 @@ Napi::Value Stat(const Napi::CallbackInfo &info) {
   std::string repo = info[0].As<Napi::String>();
   std::string path = info[1].As<Napi::String>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  AttachedRepository attached_repository = GetRepo(repo, env);
+  cvmfs_context *ctx = attached_repository.ctx;
   if (ctx == NULL) {
     return env.Null();
   }
@@ -154,7 +158,7 @@ Napi::Value Stat(const Napi::CallbackInfo &info) {
   }
 
   FillAttr(attr, &result);
-
+  result.Set("revision", attached_repository.revision);
   cvmfs_attr_free(attr);
 
   if (S_ISDIR(attr->st_mode)) {
@@ -231,7 +235,7 @@ Napi::Value Open(const Napi::CallbackInfo &info) {
   std::string repo = info[0].As<Napi::String>();
   std::string path = info[1].As<Napi::String>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  cvmfs_context *ctx = GetRepo(repo, env).ctx;
   if (ctx == NULL) {
     return env.Null();
   }
@@ -259,7 +263,7 @@ Napi::Value Pread(const Napi::CallbackInfo &info) {
   int64_t size = info[2].As<Napi::Number>();
   int64_t offset = info[3].As<Napi::Number>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  cvmfs_context *ctx = GetRepo(repo, env).ctx;
   if (ctx == NULL) {
     return env.Null();
   }
@@ -290,7 +294,7 @@ Napi::Value Close(const Napi::CallbackInfo &info) {
   std::string repo = info[0].As<Napi::String>();
   int fd = info[1].As<Napi::Number>();
 
-  cvmfs_context *ctx = GetRepoCtx(repo, env);
+  cvmfs_context *ctx = GetRepo(repo, env).ctx;
   if (!ctx) {
   }
 
