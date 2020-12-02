@@ -3,18 +3,28 @@
 #include <stdio.h>
 #include <map>
 #include <sstream>
+#include <time.h>
 
 const unsigned int kMaxPathLen = 2000;
+// Root catalog TTL in seconds
+const unsigned int kDefaultTimeout = 60;
 
 cvmfs_option_map *g_opts;
 cvmfs_context *g_ctx;
 
-std::map <std::string, cvmfs_context *> g_attached_repos;
+struct AttachedRepository {
+  cvmfs_context *ctx;
+  // When to check next time for remount
+  time_t timeout_deadline;
+};
+
+std::map <std::string, AttachedRepository> g_attached_repos;
 
 bool AttachRepo(const std::string &repo, Napi::Env env) {
   cvmfs_option_map *opts = cvmfs_options_clone(g_opts);
   cvmfs_options_parse_default(opts, repo.c_str());
   cvmfs_context *context;
+  printf("[INF]: attaching repository %s\n", repo.c_str());
   int retcode = cvmfs_attach_repo_v2(repo.c_str(), opts, &context);
   if (retcode != 0) {
     std::stringstream error_msg;
@@ -24,7 +34,10 @@ bool AttachRepo(const std::string &repo, Napi::Env env) {
     return false;
   }
   cvmfs_adopt_options(context, opts);
-  g_attached_repos[repo] = context;
+  AttachedRepository ar;
+  ar.ctx = context;
+  ar.timeout_deadline = time(NULL) + kDefaultTimeout;
+  g_attached_repos[repo] = ar;
   return true;
 }
 
@@ -32,7 +45,18 @@ cvmfs_context *GetRepoCtx(const std::string repo, Napi::Env env) {
   if (g_attached_repos.count(repo) == 0) {
     if (!AttachRepo(repo, env)) return NULL;
   }
-  return g_attached_repos[repo];
+  if (time(NULL) > g_attached_repos[repo].timeout_deadline) {
+    printf("[INF]: remounting %s due to timeout\n", repo.c_str());
+    int retval = cvmfs_remount(g_attached_repos[repo].ctx);
+    if (retval != 0) {
+      std::stringstream error_msg;
+      error_msg << "remounting " << repo << " failed (error code " << retval << ")";
+      Napi::Error::New(env, error_msg.str()).ThrowAsJavaScriptException();
+    } else {
+      g_attached_repos[repo].timeout_deadline = time(NULL) + kDefaultTimeout;
+    }
+  }
+  return g_attached_repos[repo].ctx;
 }
 
 void FillStat(cvmfs_stat_t *st, Napi::Object *obj) {
