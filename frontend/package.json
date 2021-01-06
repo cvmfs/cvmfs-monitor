@@ -6,7 +6,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.21",
     "@fortawesome/free-solid-svg-icons": "^5.10.1",
     "@fortawesome/react-fontawesome": "^0.1.4",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "dotenv": "^8.1.0",
     "leaflet": "^1.5.1",
     "moment": "^2.24.0",
