@@ -37,6 +37,13 @@ RUN echo "CVMFS_KEYS_DIR=/etc/cvmfs/keys/desy.de" > /etc/cvmfs/domain.d/desy.de.
 RUN echo "CVMFS_SERVER_URL='http://grid-cvmfs-one.desy.de:8000/cvmfs/@fqrn@'" >> /etc/cvmfs/domain.d/desy.de.conf
 RUN curl https://ecsft.cern.ch/dist/cvmfs/builddeps/desy.de.pub > /etc/cvmfs/keys/desy.de/desy.de.pub
 
+# TODO: install through proper configuration repo
+# https://kekcc.kek.jp/service/kekcc/support/en/08-01/#etccvmfsdefaultd69-kekconf
+RUN mkdir /etc/cvmfs/keys/kek.jp
+RUN echo "CVMFS_KEYS_DIR=/etc/cvmfs/keys/kek.jp" > /etc/cvmfs/domain.d/kek.jp.conf
+RUN echo "CVMFS_SERVER_URL='http://cvmfs-stratum-one.cc.kek.jp:8000/cvmfs/@fqrn@';http://grid-cvmfs-one.desy.de:8000/cvmfs/@fqrn@;http://cvmfs.racf.bnl.gov:8000/cvmfs/@fqrn@" >> /etc/cvmfs/domain.d/kek.jp.conf
+RUN echo "CVMFS_USE_GEOAPI=yes" >> /etc/cvmfs/domain.d/kek.jp.conf
+RUN curl https://ecsft.cern.ch/dist/cvmfs/builddeps/kek.jp.pub > /etc/cvmfs/keys/kek.jp/kek.jp.pub
 
 RUN mkdir -p /var/lib/cvmfs/libcvmfs
 RUN chmod -R 777 /var/lib/cvmfs
