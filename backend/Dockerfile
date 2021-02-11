@@ -5,15 +5,8 @@ EXPOSE 8080
 USER root
 
 # TODO: uncomment as soon as libcvmfs built with -fPIC is released
-#RUN yum install -y https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm
-#RUN yum install -y cvmfs-devel
-
-RUN yum install -y openssl libuuid-devel libcurl-devel
-
-RUN curl https://ecsft.cern.ch/dist/cvmfs/nightlies/cvmfs-git-2628/cvmfs-devel-2.8.0-0.2628.e21d38cda9eb95fegit.el8.x86_64.rpm > /root/cvmfs-devel.rpm
-RUN rpm -i /root/cvmfs-devel.rpm
-RUN curl http://ecsft.cern.ch/dist/cvmfs/cvmfs-config/cvmfs-config-default-latest.noarch.rpm > /root/cvmfs-config.rpm
-RUN rpm -i /root/cvmfs-config.rpm
+RUN yum install -y https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm
+RUN yum install -y cvmfs-devel cvmfs-config-default
 
 RUN echo "CVMFS_HTTP_PROXY=DIRECT" > /etc/cvmfs/default.local
 
